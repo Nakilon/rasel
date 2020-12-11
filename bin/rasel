@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+Signal.trap(:INT){ abort "\n(interrupted by SIGINT)" }
+
+require_relative "../lib/rasel"
+exit RASEL(ARGF.read, STDOUT).exitcode

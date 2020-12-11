@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.license      = "MIT"
   spec.metadata     = {"source_code_uri" => "https://github.com/nakilon/rasel"}
 
-  spec.add_development_dependency "minitest"
+  spec.add_development_dependency "minitest-around"
 
   spec.test_file    = "test.rb"
   spec.files        = %w{ LICENSE rasel.gemspec lib/rasel.rb }

@@ -14,21 +14,21 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
     y = (y + dy) % code.size
     x = (x + dx) % code[y].size
   end
-  reverse ->{ dy, dx = -dy, -dx }
+  reverse = ->{ dy, dx = -dy, -dx }
   stringmode = false
 
   loop do
     move[]
     char = code[y][x] || 32
-    STDERR.puts [char.chr, stack].inspect if ENV["DEBUG"]
-    return Struct.new(:stdout, :stack, :exitcode).new stdout, stack, pop[] if char.chr == ?@
+    STDERR.puts [char.chr, stringmode, stack].inspect if ENV["DEBUG"]
     next stack << char if stringmode && char.chr != ?"
-    next unless (33..126).include? char   # just for performance
+    return Struct.new(:stdout, :stack, :exitcode).new stdout, stack, pop[].to_i if char.chr == ?@   # TODO: type exception
     case char.chr
+      when ?\s
 
       ### Befunge
       when ?" ; stringmode ^= true
-      when ?0..?9, ?A..?Z ; stack << char.to_i(36)
+      when ?0..?9, ?A..?Z ; stack << char.chr.to_i(36).to_r
       when ?$ ; pop[]
       when ?: ; stack.concat [pop[]] * 2
       when ?\\ ; stack.concat [pop[], pop[]]
@@ -40,11 +40,11 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
       when ?- ; stack.push -(pop[] - pop[])
       when ?/ ; b, a = pop[], pop[]; stack.push (b.zero? ? 0 : a / b)
       when ?% ; b, a = pop[], pop[]; stack.push (b.zero? ? 0 : a % b)
-      when ?| ; pop[] > 0 ? go_south[] : go_north[]
-      when ?_ ; pop[] > 0 ? go_east[] : go_west[]
+      when ?| ; pop[] <= 0 ? go_south[] : go_north[]
+      when ?_ ; pop[] <= 0 ? go_east[] : go_west[]
       when ?! ; stack.push (pop[].zero? ? 1r : 0r)
-      when ?, ; stdout.print pop[].chr
-      when ?. ; stdout.print "#{pop[]} "
+      when ?, ; stdout.print pop[].to_i.chr   # TODO: type exception
+      when ?. ; stdout.print "#{_ = pop[]; _.denominator == 1 ? _.to_i : _.to_f} "
       when ?~ ; if c = stdin.getbyte then stack.push c else reverse[] end
       when ?&
         getc = ->{ stdin.getc or (reverse[]; throw nil) }
@@ -55,15 +55,16 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
         end
       when ?j
         if 0 < t = pop[]
-          t.times{ move[] }
+          t.to_i.times{ move[] }
         else
           reverse[]
-          (-t).times{ move[] }
+          (-t).to_i.times{ move[] }
           reverse[]
         end
 
       ### RASEL
 
+      else ; fail "invalid character #{char}"
     end
   end
 end
