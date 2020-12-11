@@ -1,0 +1,10 @@
+on:
+  push:
+    branches: [master]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: docker run -v $(pwd):/checkout ruby:alpine sh -c "cd /checkout && bundle install && ruby test.rb"
+      timeout-minutes: 1
