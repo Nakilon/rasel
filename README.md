@@ -30,17 +30,25 @@ A programming language inspired by Befunge-93.
   * `p` and `g` (put and get)  
     random access should make self-modification almost useless and simplify the implementation because program won't expand, also in theory it's easier for optimization
 
+## Reference specification
+
+* All the errors raised according to this specification should halt the program with any (depends on the implementation) non-0 exit code. The only undefined things in this specification are how float numbers are printed and how empty source file is treated. If you find anything else missing, please report since it should be defined.
+* Programs are read as ASCII-8BIT lines splitted by 0x0A character. For every source code line trailing space characters are trimmed and then readded to reach the length defined by the highest x coordinate of any (including invalid) non-space character in the whole source file. Lines with no non-space characters at the end of the source file are trimmed. After the source code load the program space is effectively a rectangle of NxM characters that has at least one non-space character in the last column and in the last row too. Space characters are [nop](https://en.wikipedia.org/wiki/NOP_(code))s when not in the stringmode. All other characters that are not defined in the specification raise an error if the instruction pointer reaches them.
+* Instructions:
+  * `"` -- toggle "stringmode" (by default is off)  
+    In this mode space character (that is nop by default) is treated as an instruction to push the value 32 onto the stack.
+
 ## TODO
 
 - [ ] page at esolangs.org
 - [ ] some examples
 - [ ] announcement
-- [ ] implementation
+- [ ] implementation, tests and docs
   - [ ] executable
-  - [ ] non-instructional tests
-  - [ ] instructional tests and docs
+  - [x] non-instructional tests
+  - [ ] instructional
     - [ ] old
-      - [ ] `"`
+      - [x] `"`
       - [ ] `0`..`9`
       - [ ] `$`, `:`, `\`
       - [ ] `#`
@@ -58,10 +66,18 @@ A programming language inspired by Befunge-93.
       - [ ] `a`
       - [ ] something about additional stacks maybe
 
-## Reference (specification)
+## Development notes
 
-This reference does not describe fundamental (i.e. terms and the runtime process) that you are supposed to already know as funge family languages basics.
+Alpine packaged and dockerized rubies:
 
-TODO
-
-The only undefined (i.e. depends on the implementation) behaviour is printing a float. Otherwise any action that is not in this specification should raise an error (halt the program).
+    packages    ruby docker hub
+    3.12 2.7.1               2.5.8 2.6.6 2.7.1
+    3.11 2.6.6        2.4.10 2.5.8 2.6.6 2.7.1
+    3.10 2.5.8        2.4.10 2.5.8 2.6.6 2.7.1
+    3.9  2.5.8        2.4.9  2.5.7 2.6.5 2.7.0p1
+    3.8  2.5.8  2.3.8 2.4.6  2.5.5 2.6.3
+    3.7  2.4.10 2.3.8 2.4.5  2.5.3 2.6.0
+    3.6  2.4.6        2.4.5  2.5rc
+    3.5  2.3.8
+    3.4  2.3.7  2.3.7 2.4.4
+    3.3  2.2.9

@@ -1,7 +1,8 @@
 Encoding::default_internal = Encoding::default_external = "ASCII-8BIT"
 
 def RASEL source, stdout = StringIO.new, stdin = STDIN
-  code = source.tap{ |_| fail "empty source" if _.empty? }.split(?\n).map(&:bytes)
+  lines = source.tap{ |_| fail "empty source" if _.empty? }.gsub(/ +$/,"").split(?\n)
+  code = lines.map{ |_| _.ljust(lines.map(&:size).max).bytes }
   stack = []
   pop = ->{ stack.pop || 0r }
   dx, dy = 1, 0

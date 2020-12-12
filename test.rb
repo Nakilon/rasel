@@ -8,13 +8,24 @@ require_relative "lib/rasel"
 
 describe "tests" do
   around{ |test| Timeout.timeout(1){ test.call } }
+  def assert_stack expectation, *args
+    result = RASEL *args
+    assert_equal expectation, [*result.stack.map(&:to_i), result.exitcode]
+  end
+
+  describe "non-instructional tests" do
+    it "trimming spaces and empty lines" do
+      assert_stack [64, 32, 118],
+        " v @\n" +
+        "\n" +
+        " > v\n" +
+        "   \"\n" +
+        "\n \n\n"
+    end
+  end
 
   describe "lib" do
     around{ |test| Timeout.timeout(1){ test.call } }
-    def assert_stack expectation, *args
-      result = RASEL *args
-      assert_equal expectation, [*result.stack.map(&:to_i), result.exitcode]
-    end
 
     it "prints to STDOUT" do skip end
     it "prints to String" do skip end
