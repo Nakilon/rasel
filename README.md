@@ -66,7 +66,7 @@ puts RASEL('"olleh",,,,,@').stdout.string
 - [ ] announcement
 - [ ] implementation, tests and docs
   - [x] executable
-  - [x] non-instructional tests
+  - [x] non-instructional
   - [ ] instructional
     - [ ] old
       - [x] `"`
@@ -86,19 +86,3 @@ puts RASEL('"olleh",,,,,@').stdout.string
       - [ ] `j`
       - [ ] `a`
       - [ ] something about additional stacks maybe
-
-## Development notes
-
-Alpine packaged and dockerized rubies:
-
-    packages    ruby docker hub
-    3.12 2.7.1               2.5.8 2.6.6 2.7.1
-    3.11 2.6.6        2.4.10 2.5.8 2.6.6 2.7.1
-    3.10 2.5.8        2.4.10 2.5.8 2.6.6 2.7.1
-    3.9  2.5.8        2.4.9  2.5.7 2.6.5 2.7.0p1
-    3.8  2.5.8  2.3.8 2.4.6  2.5.5 2.6.3
-    3.7  2.4.10 2.3.8 2.4.5  2.5.3 2.6.0
-    3.6  2.4.6        2.4.5  2.5rc
-    3.5  2.3.8
-    3.4  2.3.7  2.3.7 2.4.4
-    3.3  2.2.9

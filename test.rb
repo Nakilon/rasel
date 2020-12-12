@@ -13,7 +13,7 @@ describe "tests" do
     assert_equal expectation, [*result.stack.map(&:to_i), result.exitcode]
   end
 
-  describe "bin" do
+  describe "executable" do
     it "hello world" do
       require "open3"
       require "tempfile"
@@ -30,8 +30,8 @@ describe "tests" do
     end
   end
 
-  describe "non-instructional tests" do
-    it "trimming spaces and empty lines" do
+  describe "non-instructional" do
+    it "trim spaces and empty lines" do
       assert_stack [64, 32, 118],
         " v @\n" +
         "\n" +
@@ -39,11 +39,24 @@ describe "tests" do
         "   \"\n" +
         "\n \n\n"
     end
+    it "print to STDOUT" do
+      # TODO: mock
+      begin
+        STDOUT, stdout = StringIO.new, STDOUT
+        RASEL ",@", STDOUT
+      ensure
+        STDOUT, stdout = stdout, STDOUT
+      end
+      assert_equal ?\0.b, stdout.string
+    end
+    it "print to String" do
+      string = StringIO.new
+      RASEL ",@", string
+      assert_equal ?\0.b, string.string
+    end
   end
 
-  describe "lib" do
-    it "prints to STDOUT" do skip end
-    it "prints to String" do skip end
+  describe "instructional" do
 
     describe "old" do
       before do assert_equal 0, RASEL("@").exitcode end
