@@ -30,6 +30,27 @@ A programming language inspired by Befunge-93.
   * `p` and `g` (put and get)  
     random access should make self-modification almost useless and simplify the implementation because program won't expand, also in theory it's easier for optimization
 
+## This implementation usage
+
+Install:
+```
+gem install rasel
+```
+Then either use the executable to run a source file:
+```bash
+echo '"olleh",,,,,A,0@' > temp.rasel
+rasel temp.rasel
+```
+Or pipe it:
+```bash
+echo '"olleh",,,,,A,0@' | rasel
+```
+Or call it from Ruby:
+```ruby
+require "rasel"
+puts RASEL('"olleh",,,,,@').stdout.string
+```
+
 ## Reference specification
 
 * All the errors raised according to this specification should halt the program with any (depends on the implementation) non-0 exit code. The only undefined things in this specification are how float numbers are printed and how empty source file is treated. If you find anything else missing, please report since it should be defined.
@@ -44,7 +65,7 @@ A programming language inspired by Befunge-93.
 - [ ] some examples
 - [ ] announcement
 - [ ] implementation, tests and docs
-  - [ ] executable
+  - [x] executable
   - [x] non-instructional tests
   - [ ] instructional
     - [ ] old

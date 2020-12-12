@@ -4,6 +4,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
     - uses: actions/checkout@v2
     - run: docker run -v $(pwd):/checkout alpine:3.6 sh -c "cd /checkout && apk update && apk add ruby && gem install -N bundler && rm -f Gemfile.lock && bundle install && ruby test.rb"

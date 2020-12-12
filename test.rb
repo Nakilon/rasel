@@ -13,6 +13,23 @@ describe "tests" do
     assert_equal expectation, [*result.stack.map(&:to_i), result.exitcode]
   end
 
+  describe "bin" do
+    it "hello world" do
+      require "open3"
+      require "tempfile"
+      begin
+        file = Tempfile.new "temp.rasel"
+        file.write 'A"!dlroW ,olleH">:#,_@'
+        file.flush
+        string, status = Open3.capture2e "bin/rasel #{file.path}"
+      ensure
+        file.close
+        file.unlink
+      end
+      assert_equal [0, "Hello, World!\n"], [status.exitstatus, string]
+    end
+  end
+
   describe "non-instructional tests" do
     it "trimming spaces and empty lines" do
       assert_stack [64, 32, 118],
@@ -25,8 +42,6 @@ describe "tests" do
   end
 
   describe "lib" do
-    around{ |test| Timeout.timeout(1){ test.call } }
-
     it "prints to STDOUT" do skip end
     it "prints to String" do skip end
 
@@ -101,23 +116,6 @@ describe "tests" do
       it "j-" do assert_stack [2, 3], "6-j123@" end
     end
 
-  end
-
-  describe "bin" do
-    it "hello world" do
-      require "open3"
-      require "tempfile"
-      file = Tempfile.new "temp.rasel"
-      begin
-        file.write 'A"!dlroW ,olleH">:#,_@'
-        file.flush
-        string, status = Open3.capture2 "bundle exec ruby bin/rasel #{file.path}"
-      ensure
-        file.close
-        file.unlink
-      end
-      assert_equal [0, "Hello, World!\n"], [status.exitstatus, string]
-    end
   end
 
 end
