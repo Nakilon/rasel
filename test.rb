@@ -70,7 +70,7 @@ describe "tests" do
         it "!" do assert_stack [1, 1, 0, 0],    "!0!1!2!@" end
         it "!-" do assert_stack      [0, 0],    "1-!02-!@" end
         it "/" do assert_stack [0, 0, 1, 2], "//12/22/21/@" end
-        it "-" do assert_stack [-90000], "--"+"9-"*10000+"@" end
+        it "-" do assert_stack [-90000, 0], "--"+"9-"*10000+"0@" end
         it "/-" do assert_equal [-(1r/2)], RASEL("1-2/0@").stack end
         it "><^v" do
           assert_stack [1, 2, 3, 4],
@@ -115,8 +115,10 @@ describe "tests" do
 
     describe "changed" do
       it "@" do
-        assert_equal 0, RASEL( "@").exitcode
-        assert_equal 1, RASEL("1@").exitcode
+        assert_equal 0, RASEL("@").exitcode
+        assert_equal 2, RASEL("2@").exitcode
+        assert_equal 255, RASEL("2-@").exitcode
+        assert_equal 255, RASEL("12/@").exitcode
       end
     end
 

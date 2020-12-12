@@ -53,11 +53,15 @@ puts RASEL('"olleh",,,,,@').stdout.string
 
 ## Reference specification
 
-* All the errors raised according to this specification should halt the program with any (depends on the implementation) non-0 exit code. The only undefined things in this specification are how float numbers are printed and how empty source file is treated. If you find anything else missing, please report since it should be defined.
+* All the "errors raised" in this specification mean it should halt the program with any (depends on the implementation) exit status code from 1 to 255. The only undefined things in this specification are how float numbers are printed and how empty source file is treated. If you find anything else missing, please report since it should be defined.
 * Programs are read as ASCII-8BIT lines splitted by 0x0A character. For every source code line trailing space characters are trimmed and then readded to reach the length defined by the highest x coordinate of any (including invalid) non-space character in the whole source file. Lines with no non-space characters at the end of the source file are trimmed. After the source code load the program space is effectively a rectangle of NxM characters that has at least one non-space character in the last column and in the last row too. Space characters are [nop](https://en.wikipedia.org/wiki/NOP_(code))s when not in the stringmode. All other characters that are not defined in the specification raise an error if the instruction pointer reaches them.
+* When stack is empty popping a value from it emits 0.
 * Instructions:
   * `"` -- toggle "stringmode" (by default is off)  
     In this mode space character (that is nop by default) is treated as an instruction to push the value 32 onto the stack.
+  * `@` -- exit with code taken from the stack  
+    If value isn't integer and isn't within 0..255 the error is raised.
+  * `0`..`9`, `A`..`Z` -- push single Base36 digit value onto the stack
 
 ## TODO
 
@@ -78,7 +82,7 @@ puts RASEL('"olleh",,,,,@').stdout.string
       - [ ] `,`, `.`
       - [ ] `!`
     - [ ] changed
-      - [ ] `@`
+      - [x] `@`
       - [ ] `~`, `&`
       - [ ] `|`, `_`
     - [ ] new

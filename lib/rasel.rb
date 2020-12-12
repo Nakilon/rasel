@@ -23,7 +23,10 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
     char = code[y][x] || 32
     STDERR.puts [char.chr, stringmode, stack].inspect if ENV["DEBUG"]
     next stack << char if stringmode && char.chr != ?"
-    return Struct.new(:stdout, :stack, :exitcode).new stdout, stack, pop[].to_i if char.chr == ?@   # TODO: type exception
+    return Struct.new(:stdout, :stack, :exitcode).new stdout, stack, (
+      t = pop[]
+      1 != t.denominator || t < 0 || t > 255 ? 255 : t.to_i
+    ) if char.chr == ?@
     case char.chr
       when ?\s
 
@@ -45,7 +48,7 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
       when ?_ ; pop[] <= 0 ? go_east[] : go_west[]
       when ?! ; stack.push (pop[].zero? ? 1r : 0r)
       when ?, ; stdout.print pop[].to_i.chr   # TODO: type exception
-      when ?. ; stdout.print "#{_ = pop[]; _.denominator == 1 ? _.to_i : _.to_f} "
+      when ?. ; stdout.print "#{_ = pop[]; 1 == _.denominator ? _.to_i : _.to_f} "
       when ?~ ; if c = stdin.getbyte then stack.push c else reverse[] end
       when ?&
         getc = ->{ stdin.getc or (reverse[]; throw nil) }
