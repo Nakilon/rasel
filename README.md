@@ -70,7 +70,7 @@ puts RASEL('"olleh",,,,,@').stdout.string
   - [ ] instructional
     - [ ] old
       - [x] `"`
-      - [ ] `0`..`9`
+      - [x] `0`..`9`
       - [ ] `$`, `:`, `\`
       - [ ] `#`
       - [ ] `>`, `<`, `^`, `v`
@@ -82,7 +82,7 @@ puts RASEL('"olleh",,,,,@').stdout.string
       - [ ] `~`, `&`
       - [ ] `|`, `_`
     - [ ] new
-      - [ ] `A`..`Z`
+      - [x] `A`..`Z`
       - [ ] `j`
       - [ ] `a`
       - [ ] something about additional stacks maybe

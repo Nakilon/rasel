@@ -49,7 +49,7 @@ describe "tests" do
       end
       assert_equal ?\0.b, stdout.string
     end
-    it "print to String" do
+    it "print to StringIO" do
       string = StringIO.new
       RASEL ",@", string
       assert_equal ?\0.b, string.string
@@ -59,12 +59,10 @@ describe "tests" do
   describe "instructional" do
 
     describe "old" do
-      before do assert_equal 0, RASEL("@").exitcode end
-
       it '"' do assert_stack ["@".ord],  '"@' end
       it '#"' do assert_stack      [0], '#"@' end
+      it "0..9, A..Z" do assert_stack [*0..35], "#{[*0..9].join}#{[*?A..?Z].join}@" end
       describe "(rely on 0..9, A..Z)" do
-        before do assert_stack [*0..35], "#{[*0..9].join}#{[*?A..?Z].join}@" end
 
         it "$" do assert_stack          [1],       "$12$@" end
         it ":" do assert_stack [0, 0, 1, 1],        ":1:@" end
