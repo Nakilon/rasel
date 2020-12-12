@@ -20,7 +20,7 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
 
   loop do
     move[]
-    char = code[y][x] || 32
+    char = code[y][x] || 32r
     STDERR.puts [char.chr, stringmode, stack].inspect if ENV["DEBUG"]
     next stack << char if stringmode && char.chr != ?"
     return Struct.new(:stdout, :stack, :exitcode).new stdout, stack, (
@@ -32,11 +32,11 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
 
       ### Befunge
       when ?" ; stringmode ^= true
+      when ?# ; move[]
       when ?0..?9, ?A..?Z ; stack << char.chr.to_i(36).to_r
       when ?$ ; pop[]
       when ?: ; stack.concat [pop[]] * 2
       when ?\\ ; stack.concat [pop[], pop[]]
-      when ?# ; move[]
       when ?> ; go_east[]
       when ?< ; go_west[]
       when ?^ ; go_north[]
@@ -68,7 +68,7 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
 
       ### RASEL
 
-      else ; fail "invalid character #{char}"
+      else ; return Struct.new(:stdout, :stack, :exitcode).new stdout, stack, 255
     end
   end
 end

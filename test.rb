@@ -39,6 +39,9 @@ describe "tests" do
         "   \"\n" +
         "\n \n\n"
     end
+    it "exit status code 255 on invalid character" do
+      assert_equal 255, RASEL("Ы").exitcode
+    end
     it "print to STDOUT" do
       # TODO: mock
       begin
@@ -60,11 +63,30 @@ describe "tests" do
 
     describe "old" do
       it '"'  do assert_stack ["@".ord], '"@' end
+      it '#' do assert_stack [1], '##1@' end
       it '#"Ы' do assert_stack [64, 208, 171, 35, 64], '#@"@Ы' end
+      it '#><^vЫ' do
+        assert_stack [1, 2, 3],
+          <<~HEREDOC
+            1v@
+            v>2\#
+            >3v
+              \#
+                Ы
+          HEREDOC
+      end
       it "0..9, A..Z" do assert_stack [*0..35], "#{[*0..9].join}#{[*?A..?Z].join}@" end
       it "$"  do assert_stack [1], "$12$@" end
       it ":" do assert_stack [0, 0, 1, 1], ":1:@" end
       it ?\\ do assert_stack [0, 1, 0], "\\1\\@" end
+      it "><^v" do
+        assert_stack [1, 2, 3, 4],
+          <<~HEREDOC
+            <@^1
+            3v>
+            5425
+          HEREDOC
+      end
 
       describe "(rely on 0..9, A..Z)" do
 
@@ -73,14 +95,6 @@ describe "tests" do
         it "/" do assert_stack [0, 0, 1, 2], "//12/22/21/@" end
         it "-" do assert_stack [-90000, 0], "--"+"9-"*10000+"0@" end
         it "/-" do assert_equal [-(1r/2)], RASEL("1-2/0@").stack end
-        it "><^v" do
-          assert_stack [1, 2, 3, 4],
-            <<~HEREDOC
-              <@^1
-              3v>
-              5425
-            HEREDOC
-        end
         [
           [[1, 3], "   00"],
           [[2, 4], "   11"],

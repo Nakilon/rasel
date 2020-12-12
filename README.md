@@ -6,18 +6,20 @@ A programming language inspired by Befunge-93.
 
 ## This implementation usage
 
+(right now the gem is in the development stage and is not published yet so you need to git clone it)
+
 Install:
 ```
 gem install rasel
 ```
-Then either use the executable to run a source file:
+Now to print 'hello\n' and exit with 0 status code you can either use the executable to run a source file:
 ```bash
-echo '"olleh",,,,,A,0@' > temp.rasel
+echo '"olleh",,,,,A,@' > temp.rasel
 rasel temp.rasel
 ```
 Or pipe it:
 ```bash
-echo '"olleh",,,,,A,0@' | rasel
+echo '"olleh",,,,,A,@' | rasel
 ```
 Or call it from Ruby:
 ```ruby
@@ -28,23 +30,28 @@ puts RASEL('"olleh",,,,,@').stdout.string
 ## Reference specification
 
 * All the "errors raised" in this specification mean it should halt the program with any (depends on the implementation) exit status code from 1 to 255. The only undefined things in this specification are how float numbers are printed and how empty source file is treated. If you find anything else missing, please report since it should be defined.
-* Programs are read as ASCII-8BIT lines splitted by 0x0A character. For every source code line trailing space characters are trimmed and then readded to reach the length defined by the highest x coordinate of any (including invalid) non-space character in the whole source file. Lines with no non-space characters at the end of the source file are trimmed. After the source code load the program space is effectively a rectangle of NxM characters that has at least one non-space character in the last column and in the last row too. Space characters are [nop](https://en.wikipedia.org/wiki/NOP_(code))s when not in the stringmode. All other characters that are not defined in the specification raise an error if the instruction pointer reaches them.
+* Programs are read as ASCII-8BIT lines splitted by 0x0A character. For every source code line trailing space characters are trimmed and then readded to reach the length defined by the highest x coordinate of any (including invalid) non-space character in the whole source file. Lines with no non-space characters at the end of the source file are trimmed. After the source code load the program space is effectively a rectangle of NxM characters that has at least one non-space character in the last column and in the last row too. Space characters are [nop](https://en.wikipedia.org/wiki/NOP_(code))s when not in the stringmode. All other characters that are not defined in the specification raise an error if the instruction pointer reaches them unless the previous instruction was "trampoline" so it's just skipped.
 * "Popping a value" means taking out the top value from the stack and using it in the instruction that initiated the popping. When stack is empty popping from it supplies 0. For language user it should be effectively indistinguishable if the stack is empty or has several 0 it in.
 * Instructions:
-  * `"` -- toggle "stringmode" (by default is off)  
-    In this mode all instruction and invalid (i.e. having no meaning as an instruction) characters are pushed onto the stack.
-    In this mode space character (that is nop by default) is treated as an instruction to push the value 32 onto the stack.
   * `@` -- exit with code taken from the stack  
     If value isn't integer and isn't within 0..255 the error is raised.
+  * `"` -- toggle "stringmode" (by default is off)  
+    In this mode all instruction and invalid (i.e. having no meaning as an instruction) characters are pushed onto the stack.  
+    In this mode space character (that is nop by default) is treated as an instruction to push the value 32 onto the stack.
+  * `#` -- "trampoline" -- the character under the next instruction pointer position will be ignored  
+    If it's the last character on the source code line the first character on the other side of line will be skipped.  
+    If it's the last instruction on the source code line but not the last character (i.e. there are spaces filling it to the edge of the program space rectangle) the ignored character will be the next filling space, not some character on the other side of the line.  
+    Same about source code columns and in both directions.
   * `0`..`9`, `A`..`Z` -- push single Base36 digit value onto the stack
   * `$` -- "discard" -- pop a value and do nothing with it
   * `:` -- "duplicate" -- pop a value and add it back to the stack twice
   * `\` -- "swap" -- pop a value twice and put them back in reverse order
+  * `>`, `<`, `^`, `v` -- change direction
 
 ## Main differences from Befunge-93
 
 * `@` pops the [exit status code](https://en.wikipedia.org/wiki/Exit_status) from the stack (like `q` in [Funge-98](https://github.com/catseye/Funge-98))
-* any unknown character (i.e. not an instruction, space or newline) while not in stringmode throws an exception
+* any unknown character (i.e. not an instruction, space or newline) while not in stringmode raises an error
 * reading EOF from STDIN works as "Reverse" instruction (like in Funge-98)
 * stack and program space ("playfield" in [Befunge-93](https://github.com/catseye/Befunge-93) terminology) have no size limits
 * stack data type is [Rational](https://en.wikipedia.org/wiki/Rational_data_type)  
@@ -78,10 +85,10 @@ puts RASEL('"olleh",,,,,@').stdout.string
   - [ ] instructional
     - [ ] old
       - [x] `"`
+      - [x] `#`
       - [x] `0`..`9`
       - [x] `$`, `:`, `\`
-      - [ ] `#`
-      - [ ] `>`, `<`, `^`, `v`
+      - [x] `>`, `<`, `^`, `v`
       - [ ] `-`, `/`, `%`
       - [ ] `,`, `.`
       - [ ] `!`
