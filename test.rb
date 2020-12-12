@@ -59,14 +59,15 @@ describe "tests" do
   describe "instructional" do
 
     describe "old" do
-      it '"' do assert_stack ["@".ord],  '"@' end
-      it '#"' do assert_stack      [0], '#"@' end
+      it '"'  do assert_stack ["@".ord], '"@' end
+      it '#"Ы' do assert_stack [64, 208, 171, 35, 64], '#@"@Ы' end
       it "0..9, A..Z" do assert_stack [*0..35], "#{[*0..9].join}#{[*?A..?Z].join}@" end
+      it "$"  do assert_stack [1], "$12$@" end
+      it ":" do assert_stack [0, 0, 1, 1], ":1:@" end
+      it ?\\ do assert_stack [0, 1, 0], "\\1\\@" end
+
       describe "(rely on 0..9, A..Z)" do
 
-        it "$" do assert_stack          [1],       "$12$@" end
-        it ":" do assert_stack [0, 0, 1, 1],        ":1:@" end
-        it ?\\ do assert_stack    [0, 1, 0],      "\\1\\@" end
         it "!" do assert_stack [1, 1, 0, 0],    "!0!1!2!@" end
         it "!-" do assert_stack      [0, 0],    "1-!02-!@" end
         it "/" do assert_stack [0, 0, 1, 2], "//12/22/21/@" end

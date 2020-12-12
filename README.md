@@ -6,9 +6,9 @@ A programming language inspired by Befunge-93.
 
 ## Differences from Befunge-93
 
-* `@` pops the exit code from the stack
+* `@` pops the [exit status code](https://en.wikipedia.org/wiki/Exit_status) from the stack (like `q` in [Funge-98](https://github.com/catseye/Funge-98))
 * any unknown character (i.e. not an instruction, space or newline) while not in stringmode throws an exception
-* reading EOF from STDIN works as "Reverse" instruction (like in [Funge-98](https://github.com/catseye/Funge-98))
+* reading EOF from STDIN works as "Reverse" instruction (like in Funge-98)
 * stack and program space ("playfield" in [Befunge-93](https://github.com/catseye/Befunge-93) terminology) have no size limits
 * stack data type is [Rational](https://en.wikipedia.org/wiki/Rational_data_type)  
   numerators and denominators are bignums, i.e. there should be no [rounding errors](https://en.wikipedia.org/wiki/Round-off_error)
@@ -55,13 +55,17 @@ puts RASEL('"olleh",,,,,@').stdout.string
 
 * All the "errors raised" in this specification mean it should halt the program with any (depends on the implementation) exit status code from 1 to 255. The only undefined things in this specification are how float numbers are printed and how empty source file is treated. If you find anything else missing, please report since it should be defined.
 * Programs are read as ASCII-8BIT lines splitted by 0x0A character. For every source code line trailing space characters are trimmed and then readded to reach the length defined by the highest x coordinate of any (including invalid) non-space character in the whole source file. Lines with no non-space characters at the end of the source file are trimmed. After the source code load the program space is effectively a rectangle of NxM characters that has at least one non-space character in the last column and in the last row too. Space characters are [nop](https://en.wikipedia.org/wiki/NOP_(code))s when not in the stringmode. All other characters that are not defined in the specification raise an error if the instruction pointer reaches them.
-* When stack is empty popping a value from it emits 0.
+* "Popping a value" means taking out the top value from the stack and using it in the instruction that initiated the popping. When stack is empty popping from it supplies 0. For language user it should be effectively indistinguishable if the stack is empty or has several 0 it in.
 * Instructions:
   * `"` -- toggle "stringmode" (by default is off)  
+    In this mode all instruction and invalid (i.e. having no meaning as an instruction) characters are pushed onto the stack.
     In this mode space character (that is nop by default) is treated as an instruction to push the value 32 onto the stack.
   * `@` -- exit with code taken from the stack  
     If value isn't integer and isn't within 0..255 the error is raised.
   * `0`..`9`, `A`..`Z` -- push single Base36 digit value onto the stack
+  * `$` -- "discard" -- pop a value and do nothing with it
+  * `:` -- "duplicate" -- pop a value and add it back to the stack twice
+  * `\` -- "swap" -- pop a value twice and put them back in reverse order
 
 ## TODO
 
@@ -75,7 +79,7 @@ puts RASEL('"olleh",,,,,@').stdout.string
     - [ ] old
       - [x] `"`
       - [x] `0`..`9`
-      - [ ] `$`, `:`, `\`
+      - [x] `$`, `:`, `\`
       - [ ] `#`
       - [ ] `>`, `<`, `^`, `v`
       - [ ] `-`, `/`, `%`
