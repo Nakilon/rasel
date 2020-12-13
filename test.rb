@@ -10,7 +10,7 @@ describe "tests" do
   around{ |test| Timeout.timeout(1){ test.call } }
   def assert_stack expectation, *args
     result = RASEL *args
-    assert_equal expectation, [*result.stack.map(&:to_i), result.exitcode]
+    assert_equal expectation.map(&:to_r), [*result.stack, result.exitcode]
   end
 
   describe "executable" do
@@ -87,14 +87,14 @@ describe "tests" do
             5425
           HEREDOC
       end
+      it "-" do assert_stack [-90000, 0], "--"+"9-"*10000+"0@" end
+      it "/" do assert_stack [0, 0, 0.5, 1, 2], "//10/12/22/21/@" end
+      it "%" do assert_stack [0, 0, 1, 0, 0], "%%10%12%22%21%@" end
+      it "/-" do assert_equal [-0.5], RASEL("1-2/0@").stack end
+      it "%-" do assert_equal [1], RASEL("1-2%0@").stack end
 
       describe "(rely on 0..9, A..Z)" do
 
-        it "!" do assert_stack [1, 1, 0, 0],    "!0!1!2!@" end
-        it "!-" do assert_stack      [0, 0],    "1-!02-!@" end
-        it "/" do assert_stack [0, 0, 1, 2], "//12/22/21/@" end
-        it "-" do assert_stack [-90000, 0], "--"+"9-"*10000+"0@" end
-        it "/-" do assert_equal [-(1r/2)], RASEL("1-2/0@").stack end
         [
           [[1, 3], "   00"],
           [[2, 4], "   11"],

@@ -47,6 +47,8 @@ puts RASEL('"olleh",,,,,@').stdout.string
   * `:` -- "duplicate" -- pop a value and add it back to the stack twice
   * `\` -- "swap" -- pop a value twice and put them back in reverse order
   * `>`, `<`, `^`, `v` -- change direction
+  * `-`, `/`, `%` -- pop two values and push the result of an arithmetic operation  
+    If divisor or modulus is 0 it's not an error and result is 0.
 
 ## Main differences from Befunge-93
 
@@ -69,6 +71,8 @@ puts RASEL('"olleh",,,,,@').stdout.string
     can be easily emulated using `-` and `/` (subtraction and division), removed just for the fun of it
   * `` ` `` (if greater)  
     can be easily emulated using `-` and new `|` and `_`
+  * `!` (logical negation)
+    can be emulated too
   * `?` (move to random direction)  
     because it wasn't much needed
   * `p` and `g` (put and get)  
@@ -89,9 +93,8 @@ puts RASEL('"olleh",,,,,@').stdout.string
       - [x] `0`..`9`
       - [x] `$`, `:`, `\`
       - [x] `>`, `<`, `^`, `v`
-      - [ ] `-`, `/`, `%`
+      - [x] `-`, `/`, `%`
       - [ ] `,`, `.`
-      - [ ] `!`
     - [ ] changed
       - [x] `@`
       - [ ] `~`, `&`

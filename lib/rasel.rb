@@ -46,7 +46,6 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
       when ?% ; b, a = pop[], pop[]; stack.push (b.zero? ? 0 : a % b)
       when ?| ; pop[] <= 0 ? go_south[] : go_north[]
       when ?_ ; pop[] <= 0 ? go_east[] : go_west[]
-      when ?! ; stack.push (pop[].zero? ? 1r : 0r)
       when ?, ; stdout.print pop[].to_i.chr   # TODO: type exception
       when ?. ; stdout.print "#{_ = pop[]; 1 == _.denominator ? _.to_i : _.to_f} "
       when ?~ ; if c = stdin.getbyte then stack.push c else reverse[] end
