@@ -2,7 +2,8 @@
 
 # RASEL (Random Access Stack Esoteric Language)
 
-A programming language inspired by Befunge-93.
+A programming language inspired by Befunge-93.  
+Currently only Read is random. Write is still possible only to the top of the stack.
 
 ## This implementation usage
 
@@ -31,11 +32,11 @@ puts RASEL('"olleh",,,,,@').stdout.string
 
 * All the "errors raised" in this specification mean it should halt the program with any (depends on the implementation) [exit status code](https://en.wikipedia.org/wiki/Exit_status) from 1 to 255. The only undefined things in this specification are how float numbers are printed (TODO: maybe implement the ability to specify precision?) and how empty source file is treated. If you find anything else missing, please report since it should be defined.
 * Programs are read as ASCII-8BIT lines splitted by 0x0A character. For every source code line trailing space characters are trimmed and then readded to reach the length defined by the highest x coordinate of any (including invalid) non-space character in the whole source file. Lines with no non-space characters at the end of the source file are trimmed. After the source code load the program space is effectively a rectangle of NxM characters that has at least one non-space character in the last column and in the last row too. Space characters are [nop](https://en.wikipedia.org/wiki/NOP_(code))s when not in the stringmode. All other characters that are not defined in the specification raise an error if the instruction pointer reaches them unless the previous instruction was "trampoline" so it's just skipped.
-* Stack and program space data type is [Rational](https://en.wikipedia.org/wiki/Rational_data_type). Numerators and denominators are bignums, i.e. there should be no [rounding errors](https://en.wikipedia.org/wiki/Round-off_error).
+* Stack and program space data type is [Rational](https://en.wikipedia.org/wiki/Rational_data_type). Numerators and denominators are bignums, i.e. there should be no [rounding errors](https://en.wikipedia.org/wiki/Round-off_error). The "is integer" in this specification means "does not have a [fractional part](https://en.wikipedia.org/wiki/Fractional_part)".
 * "Popping a value" means taking out the top value from the stack and using it in the instruction that initiated the popping. When stack is empty popping from it supplies 0. For language user it should be effectively indistinguishable if the stack is empty or has several 0 it in.
 * Instructions:
   * `@` -- exit with code taken from the stack  
-    If value isn't integer and isn't within 0..255 the error is raised.
+    If the value isn't integer and isn't within 0..255 the error is raised.
   * `"` -- toggle "stringmode" (by default is off)  
     In this mode all instruction and invalid (i.e. having no meaning as an instruction) characters are pushed onto the stack.  
     In this mode space character (that is nop by default) is treated as an instruction to push the value 32 onto the stack.
@@ -51,20 +52,24 @@ puts RASEL('"olleh",,,,,@').stdout.string
   * `-`, `/`, `%` -- pop two values and push the result of an arithmetic operation  
     If divisor or modulus is 0 it's not an error and result is 0.
   * `.` -- pop a value and print it as a number  
-    Print as integer or as float if there is a [fractional part](https://en.wikipedia.org/wiki/Fractional_part).
+    Print as integer or as float if there is not integer.
   * `,` -- pop a value and print it as a char of the corresponding ASCII code  
-    If value isn't integer and isn't within 0..255 the error is raised.
+    If the value isn't integer and isn't within 0..255 the error is raised.
   * `~` -- read character from STDIN and put onto the stack  
     EOF reverses the direction of the instruction pointer and does not put anything onto the stack.
   * `&` -- read Base10 non-negative integer from STDIN and put onto the stack  
     EOF reverses the direction of the instruction pointer and does not put anything onto the stack.  
     Leading non-digit characters are omitted -- that allows to consecutively read numbers that have any non-digits characters in between.
   * `j` -- "jump forward" -- pop a value from the stack and jump over that many cells in the current instruction pointer direction  
-    If value isn't integer the error is raised.  
-    If value is negative, jump is done the opposite direction but the instruction pointer direction does not change.
+    If the value isn't integer the error is raised.  
+    If the value is negative, jump is done the opposite direction but the instruction pointer direction does not change.
   * `|`, `_` -- "go north if", "go west if"  
     Set instruction pointer direction to north or west if the popped value is positive, south and east otherwise.  
     0 is not positive.
+  * `a` -- "take at" -- pop a value N from the stack, then copy the Nth value from it to the top  
+    If the top stack value is 0 or exceeds the size of stack then it's effectively the same as `$0`.  
+    If the top stack value is 1 it's effectively the same as `$:`.  
+    If the top stack value is negative or is not integer the error is raised.
 
 ## Main differences from Befunge-93
 
@@ -100,7 +105,7 @@ puts RASEL('"olleh",,,,,@').stdout.string
 - [ ] implementation, tests and docs
   - [x] executable
   - [x] non-instructional
-  - [ ] instructional
+  - [x] instructional
     - [x] old
       - [x] `"`, `#`
       - [x] `0`..`9`
@@ -112,8 +117,8 @@ puts RASEL('"olleh",,,,,@').stdout.string
       - [x] `@`
       - [x] `~`, `&`
       - [x] `|`, `_`
-    - [ ] new
+    - [x] new
       - [x] `A`..`Z`
       - [x] `j`
-      - [ ] `a`
+      - [x] `a`
       - [ ] TODO: maybe something about additional stacks
