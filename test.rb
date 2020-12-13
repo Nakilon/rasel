@@ -50,12 +50,12 @@ describe "tests" do
       ensure
         STDOUT, stdout = stdout, STDOUT
       end
-      assert_equal ?\0.b, stdout.string
+      assert_equal ?\0, stdout.string
     end
     it "print to StringIO" do
       string = StringIO.new
       RASEL ",@", string
-      assert_equal ?\0.b, string.string
+      assert_equal ?\0, string.string
     end
   end
 
@@ -119,18 +119,6 @@ describe "tests" do
               HEREDOC
           end
         end
-        it "~" do
-          assert_stack [2], "~1@2", StringIO.new, StringIO.new
-          assert_stack [0, 10, 255, 0], "~~~~@", StringIO.new,
-            StringIO.new.tap{ |s| [0, 10, 255, 0].reverse_each &s.method(:ungetbyte) }
-        end
-        it "&" do
-          assert_stack [2], "&1@2", StringIO.new, StringIO.new
-          [?\0, ?\xa, ?\xff].each do |c|
-            assert_stack [12, 34], "&&@", StringIO.new,
-              StringIO.new.tap{ |s| "#{c}-12#{c}-34#{c}".bytes.reverse_each &s.method(:ungetbyte) }
-          end
-        end
       end
     end
 
@@ -140,6 +128,18 @@ describe "tests" do
         assert_equal 2, RASEL("2@").exitcode
         assert_equal 255, RASEL("2-@").exitcode
         assert_equal 255, RASEL("12/@").exitcode
+      end
+      it "~" do
+        assert_stack [2], "~1@2", StringIO.new, StringIO.new
+        assert_stack [0, 10, 255, 0], "~~~~@", StringIO.new,
+          StringIO.new.tap{ |s| [0, 10, 255, 0].reverse_each &s.method(:ungetbyte) }
+      end
+      it "&" do
+        assert_stack [2], "&1@2", StringIO.new, StringIO.new
+        [0, 10, 255].each do |c|
+          assert_stack [12, 34], "&&@", StringIO.new,
+            StringIO.new.tap{ |s| "#{c.chr}-12#{c.chr}-34#{c.chr}".bytes.reverse_each &s.method(:ungetbyte) }
+        end
       end
     end
 

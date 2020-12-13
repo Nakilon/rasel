@@ -54,6 +54,11 @@ puts RASEL('"olleh",,,,,@').stdout.string
     Print as integer or as float if there is a [fractional part](https://en.wikipedia.org/wiki/Fractional_part).
   * `,` -- pop a value and print it as a char of the corresponding ASCII code  
     If value isn't integer and isn't within 0..255 the error is raised.
+  * `~` -- read character from STDIN and put onto the stack  
+    EOF reverses the direction of the instruction pointer and does not put anything onto the stack.
+  * `&` -- read Base10 integer from STDIN and put onto the stack  
+    EOF reverses the direction of the instruction pointer and does not put anything onto the stack.  
+    Leading non-digit characters are omitted -- that allows to consecutively read numbers that have any non-digits characters in between.
 
 ## Main differences from Befunge-93
 
@@ -100,7 +105,7 @@ puts RASEL('"olleh",,,,,@').stdout.string
       - [x] `.`, `,`
     - [ ] changed
       - [x] `@`
-      - [ ] `~`, `&`
+      - [x] `~`, `&`
       - [ ] `|`, `_`
     - [ ] new
       - [x] `A`..`Z`
