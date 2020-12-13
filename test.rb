@@ -38,6 +38,14 @@ describe "tests" do
         " > v\n" +
         "   \"\n" +
         "\n \n\n"
+      assert_stack [1, 2],
+        '  v@ '"\n"\
+        '   2 '"\n"\
+        '   @ '"\n"\
+        '@v># '"\n"\
+        ' >1v '"\n"\
+        '   # '"\n"\
+        '     '
     end
     it "exit status code 255 on invalid character" do
       assert_equal 255, RASEL("Ы").exitcode
@@ -100,7 +108,6 @@ describe "tests" do
         assert_equal 255, RASEL("GG*,@").exitcode
         assert_equal 255, RASEL("12/,@").exitcode
       end
-
     end
 
     describe "changed" do
@@ -153,6 +160,7 @@ describe "tests" do
       it "a:." do assert_equal "2 0 0 ", RASEL("21a:.a:.a:.@").stdout.string end
       it "exit status code 255 on negative 'take at' argument" do
         assert_equal 255, RASEL("1-a@").exitcode
+        assert_equal 255, RASEL("12/a@").exitcode
       end
     end
 

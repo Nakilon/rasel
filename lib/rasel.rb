@@ -72,6 +72,7 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
         t = pop[]
         error[] if 0 > t || 1 != t.denominator
         stack.push t.zero? ? 0 : stack[-t] || 0
+
       else ; error[]
     end
   end

@@ -31,18 +31,18 @@ puts RASEL('"olleh",,,,,@').stdout.string
 ## Reference specification
 
 * All the "errors raised" in this specification mean it should halt the program with any (depends on the implementation) [exit status code](https://en.wikipedia.org/wiki/Exit_status) from 1 to 255. The only undefined things in this specification are how float numbers are printed (TODO: maybe implement the ability to specify precision?) and how empty source file is treated. If you find anything else missing, please report since it should be defined.
-* Programs are read as ASCII-8BIT lines splitted by 0x0A character. For every source code line trailing space characters are trimmed and then readded to reach the length defined by the highest x coordinate of any (including invalid) non-space character in the whole source file. Lines with no non-space characters at the end of the source file are trimmed. After the source code load the program space is effectively a rectangle of NxM characters that has at least one non-space character in the last column and in the last row too. Space characters are [nop](https://en.wikipedia.org/wiki/NOP_(code))s when not in the stringmode. All other characters that are not defined in the specification raise an error if the instruction pointer reaches them unless the previous instruction was "trampoline" so it's just skipped.
-* Stack and program space data type is [Rational](https://en.wikipedia.org/wiki/Rational_data_type). Numerators and denominators are bignums, i.e. there should be no [rounding errors](https://en.wikipedia.org/wiki/Round-off_error). The "is integer" in this specification means "does not have a [fractional part](https://en.wikipedia.org/wiki/Fractional_part)".
-* "Popping a value" means taking out the top value from the stack and using it in the instruction that initiated the popping. When stack is empty popping from it supplies 0. For language user it should be effectively indistinguishable if the stack is empty or has several 0 it in.
+* Programs are read as ASCII-8BIT lines splitted by 0x0A character. For every source code line trailing space characters are trimmed and then readded to reach the length defined by the highest x coordinate of any (including invalid) non-space character in the whole source file. Lines with no non-space characters at the end of the source file are trimmed. After the source code load the program space is effectively a rectangle of NxM characters that has at least one non-space character in the last column and in the last row too. Space characters are [nop](https://en.wikipedia.org/wiki/NOP_(code))s when not in the "stringmode". All other characters that are not defined in the specification raise an error if the instruction pointer reaches them unless the previous instruction was "trampoline" so it's just skipped.
+* Stack data type is [Rational](https://en.wikipedia.org/wiki/Rational_data_type). Numerators and denominators are bignums, i.e. there should be no [rounding errors](https://en.wikipedia.org/wiki/Round-off_error). The "is integer" in this specification means "does not have a [fractional part](https://en.wikipedia.org/wiki/Fractional_part)".
+* "Popping a value" means taking out the top value from the stack and using it in the instruction that initiated the popping. When stack is empty popping from it supplies 0. For language user it should be effectively indistinguishable if the stack is empty or just has several 0 left it in.
 * Instructions:
   * `@` -- exit with code taken from the stack  
     If the value isn't integer and isn't within 0..255 the error is raised.
   * `"` -- toggle "stringmode" (by default is off)  
-    In this mode all instruction and invalid (i.e. having no meaning as an instruction) characters are pushed onto the stack.  
+    In this mode all instruction and invalid (i.e. having no meaning as an instruction) characters are pushed onto the stack as a corresponding number from ASCII table.  
     In this mode space character (that is nop by default) is treated as an instruction to push the value 32 onto the stack.
   * `#` -- "trampoline" -- the character under the next instruction pointer position will be ignored  
     If it's the last character on the source code line the first character on the other side of line will be skipped.  
-    If it's the last instruction on the source code line but not the last character (i.e. there are spaces filling it to the edge of the program space rectangle) the ignored character will be the next filling space, not some character on the other side of the line.  
+    If it's the last instruction on the source code line but not the last character (i.e. there are spaces or invalid characters filling it to the edge of the program space rectangle) the ignored character will be the next character on this line, not some character on the other side of it.  
     Same about source code columns and in both directions.
   * `0`..`9`, `A`..`Z` -- push single [Base36](https://en.wikipedia.org/wiki/Base36) digit value onto the stack
   * `$` -- "discard" -- pop a value and do nothing with it
@@ -52,10 +52,10 @@ puts RASEL('"olleh",,,,,@').stdout.string
   * `-`, `/`, `%` -- pop two values and push the result of an arithmetic operation  
     If divisor or modulus is 0 it's not an error and result is 0.
   * `.` -- pop a value and print it as a number  
-    Print as integer or as float if there is not integer.
+    Print as integer or as float if there is a fractional part.
   * `,` -- pop a value and print it as a char of the corresponding ASCII code  
-    If the value isn't integer and isn't within 0..255 the error is raised.
-  * `~` -- read character from STDIN and put onto the stack  
+    If the value isn't an integer within 0..255 the error is raised.
+  * `~` -- read character from STDIN and put its ASCII code onto the stack  
     EOF reverses the direction of the instruction pointer and does not put anything onto the stack.
   * `&` -- read Base10 non-negative integer from STDIN and put onto the stack  
     EOF reverses the direction of the instruction pointer and does not put anything onto the stack.  
@@ -99,12 +99,12 @@ puts RASEL('"olleh",,,,,@').stdout.string
 
 ## TODO
 
-- [ ] page at esolangs.org
 - [ ] some examples
+- [ ] page at esolangs.org
 - [ ] announcement
-- [ ] implementation, tests and docs
-  - [x] executable
+- [x] implementation, tests and docs
   - [x] non-instructional
+  - [x] executable
   - [x] instructional
     - [x] old
       - [x] `"`, `#`
