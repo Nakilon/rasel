@@ -19,9 +19,9 @@ describe "tests" do
       require "tempfile"
       begin
         file = Tempfile.new "temp.rasel"
-        file.write 'A"!dlroW ,olleH">:#,_@'
+        file.write 'A"!dlroW ,olleH">:#@?,09-j'
         file.flush
-        string, status = Open3.capture2e "bin/rasel #{file.path}"
+        string, status = Open3.capture2e "./bin/rasel #{file.path}"
       ensure
         file.close
         file.unlink
@@ -130,21 +130,17 @@ describe "tests" do
         end
       end
       [
-        [[1, 3], "   00"],
-        [[2, 3], "   01"],
-        [[1, 4], "   10"],
-        [[2, 4], "   11"],
-        [[1, 3], "  1-0"],
-        [[1, 3], "   1-"],
-        [[1, 3], "1-01-"],
+        [[0], ""],
+        [[1], "1"],
+        [[0], "1-"],
+        [[1], "12/"],
+        [[0], "12/-"],
       ].each do |expectation, code|
-        it "|_- #{code}" do
-          assert_stack expectation,
-            <<~HEREDOC
-              #{code}|
-                 41_13@
-                 42_23@
-            HEREDOC
+        it "? #{code}" do
+          assert_stack expectation, "#{code}\#@?1@"
+          assert_stack expectation, "v#{code}\#@?1@".chars.zip.transpose.join(?\n)
+          assert_stack expectation, "<@1?@\##{code.reverse}"
+          assert_stack expectation, "^@1?@\##{code.reverse}".chars.zip.transpose.join(?\n)
         end
       end
     end

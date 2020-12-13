@@ -2,7 +2,7 @@
 
 # RASEL (Random Access Stack Esoteric Language)
 
-A programming language inspired by Befunge-93.  
+A programming language inspired by Befunge.  
 Currently only Read is random. Write is still possible only to the top of the stack.
 
 ## This implementation usage
@@ -26,6 +26,10 @@ Or call it from Ruby:
 ```ruby
 require "rasel"
 puts RASEL('"olleh",,,,,@').stdout.string
+```
+To run a program and feed it an input from a file:
+```bash
+rasel program.rasel < input.txt
 ```
 
 ## Reference specification
@@ -63,39 +67,36 @@ puts RASEL('"olleh",,,,,@').stdout.string
   * `j` -- "jump forward" -- pop a value from the stack and jump over that many cells in the current instruction pointer direction  
     If the value isn't integer the error is raised.  
     If the value is negative, jump is done the opposite direction but the instruction pointer direction does not change.
-  * `|`, `_` -- "go north if", "go west if"  
-    Set instruction pointer direction to north or west if the popped value is positive, south and east otherwise.  
-    0 is not positive.
+  * `?` -- "if" -- pop a value and do nothing if it's positive  
+    Reverse the direction of the instruction pointer if it's negative or 0.
   * `a` -- "take at" -- pop a value N from the stack, then copy the Nth value from it to the top  
     If the top stack value is 0 or exceeds the size of stack then it's effectively the same as `$0`.  
     If the top stack value is 1 it's effectively the same as `$:`.  
     If the top stack value is negative or is not integer the error is raised.
 
-## Main differences from Befunge-93
+## Not all but the main differences from Befunge-93/98
 
-* `@` pops the exit status code from the stack (like `q` in [Funge-98](https://github.com/catseye/Funge-98))
-* any unknown character (i.e. not an instruction, space or newline) while not in stringmode raises an error
-* reading EOF from STDIN works as "Reverse" instruction (like in Funge-98)
+* `@` pops an exit status code from the stack (like `q` in [Funge-98](https://github.com/catseye/Funge-98))
 * stack and program space ("playfield" in [Befunge-93](https://github.com/catseye/Befunge-93) terminology) have no size limits
-* stack and program space data type is Rational
-* `|` and `_` instead of checking if the popped value is zero now check if it's positive
+* stack data type is Rational
 * instructions that are added
   * `A`..`Z` (case sensitive Base36)  
     push an integer from 10 to 35 onto the stack
   * `j` ("jump forward" from Funge-98)
   * `a` ("take at" -- the Random Access thing)  
     pop a value N from the stack and duplicate the Nth value from the stack onto its top
+* instructions `|` and `_` are replaced with a single instruction `?` that reverses current direction if the popped value is not positive
 * instructions that are removed
+  * `?` (move to random direction)  
+    because it wasn't much needed
   * `+` and `*` (addition and multiplication)  
     can be easily emulated using `-` and `/` (subtraction and division), removed just for the fun of it
   * `` ` `` (if greater)  
-    can be easily emulated using `-` and new `|` and `_`
+    can be easily emulated using `-` and `?`
   * `!` (logical negation)
     can be emulated too
-  * `?` (move to random direction)  
-    because it wasn't much needed
   * `p` and `g` (put and get)  
-    random access should make self-modification almost useless and simplify the implementation because program won't expand, also in theory it's easier for optimization
+    random stack access should make self-modification almost useless and simplify the implementation because program won't expand, also it might be easier for optimization
 
 ## TODO
 
@@ -116,7 +117,7 @@ puts RASEL('"olleh",,,,,@').stdout.string
     - [x] changed
       - [x] `@`
       - [x] `~`, `&`
-      - [x] `|`, `_`
+      - [x] `?`
     - [x] new
       - [x] `A`..`Z`
       - [x] `j`

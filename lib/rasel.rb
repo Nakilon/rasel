@@ -6,10 +6,6 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
   stack = []
   pop = ->{ stack.pop || 0r }
   dx, dy = 1, 0
-  go_west  = ->{ dx, dy = -1,  0 }
-  go_east  = ->{ dx, dy =  1,  0 }
-  go_north = ->{ dx, dy =  0, -1 }
-  go_south = ->{ dx, dy =  0,  1 }
   x, y = -1, 0
   move = lambda do
     y = (y + dy) % code.size
@@ -38,15 +34,14 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
       when ?$ ; pop[]
       when ?: ; stack.concat [pop[]] * 2
       when ?\\ ; stack.concat [pop[], pop[]]
-      when ?> ; go_east[]
-      when ?< ; go_west[]
-      when ?^ ; go_north[]
-      when ?v ; go_south[]
+      when ?> ; dx, dy =  1,  0
+      when ?< ; dx, dy = -1,  0
+      when ?^ ; dx, dy =  0, -1
+      when ?v ; dx, dy =  0,  1
       when ?- ; stack.push -(pop[] - pop[])
       when ?/ ; b, a = pop[], pop[]; stack.push (b.zero? ? 0 : a / b)
       when ?% ; b, a = pop[], pop[]; stack.push (b.zero? ? 0 : a % b)
-      when ?| ; pop[] > 0 ? go_north[] : go_south[]
-      when ?_ ; pop[] > 0 ? go_west[] : go_east[]
+      when ?? ; reverse[] if pop[] <= 0
       when ?. ; stdout.print "#{_ = pop[]; 1 != _.denominator ? _.to_f : _.to_i} "
       when ?, ; stdout.print "#{_ = pop[]; 1 != _.denominator ? error[] : _ < 0 || _ > 255 ? error[] : _.to_i.chr}"
       when ?~ ; if c = stdin.getbyte then stack.push c else reverse[] end
