@@ -47,7 +47,7 @@ puts RASEL('"olleh",,,,,@').stdout.string
   * `$` -- "discard" -- pop a value and do nothing with it
   * `:` -- "duplicate" -- pop a value and add it back to the stack twice
   * `\` -- "swap" -- pop a value twice and put them back in reverse order
-  * `>`, `<`, `^`, `v` -- change direction
+  * `>`, `<`, `^`, `v` -- set instruction pointer direction
   * `-`, `/`, `%` -- pop two values and push the result of an arithmetic operation  
     If divisor or modulus is 0 it's not an error and result is 0.
   * `.` -- pop a value and print it as a number  
@@ -62,6 +62,9 @@ puts RASEL('"olleh",,,,,@').stdout.string
   * `j` -- "jump forward" -- pop a value from the stack and jump over that many cells in the current instruction pointer direction  
     If value isn't integer the error is raised.  
     If value is negative, jump is done the opposite direction but the instruction pointer direction does not change.
+  * `|`, `_` -- "go north if", "go west if"  
+    Set instruction pointer direction to north or west if the popped value is positive, south and east otherwise.  
+    0 is not positive.
 
 ## Main differences from Befunge-93
 
@@ -108,7 +111,7 @@ puts RASEL('"olleh",,,,,@').stdout.string
     - [ ] changed
       - [x] `@`
       - [x] `~`, `&`
-      - [ ] `|`, `_`
+      - [x] `|`, `_`
     - [ ] new
       - [x] `A`..`Z`
       - [x] `j`

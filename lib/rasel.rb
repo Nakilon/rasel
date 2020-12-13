@@ -45,8 +45,8 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
       when ?- ; stack.push -(pop[] - pop[])
       when ?/ ; b, a = pop[], pop[]; stack.push (b.zero? ? 0 : a / b)
       when ?% ; b, a = pop[], pop[]; stack.push (b.zero? ? 0 : a % b)
-      when ?| ; pop[] <= 0 ? go_south[] : go_north[]
-      when ?_ ; pop[] <= 0 ? go_east[] : go_west[]
+      when ?| ; pop[] > 0 ? go_north[] : go_south[]
+      when ?_ ; pop[] > 0 ? go_west[] : go_east[]
       when ?. ; stdout.print "#{_ = pop[]; 1 != _.denominator ? _.to_f : _.to_i} "
       when ?, ; stdout.print "#{_ = pop[]; 1 != _.denominator ? error[] : _ < 0 || _ > 255 ? error[] : _.to_i.chr}"
       when ?~ ; if c = stdin.getbyte then stack.push c else reverse[] end

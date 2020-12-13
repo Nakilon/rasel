@@ -101,25 +101,6 @@ describe "tests" do
         assert_equal 255, RASEL("12/,@").exitcode
       end
 
-      describe "(rely on 0..9, A..Z)" do
-
-        [
-          [[1, 3], "   00"],
-          [[2, 4], "   11"],
-          [[2, 3], "   01"],
-          [[1, 4], "   10"],
-          [[1, 3], "1-01-"],
-        ].each do |expectation, code|
-          it "|_- #{code}" do
-            assert_stack expectation,
-              <<~HEREDOC
-                #{code}|
-                   41_13@
-                   42_23@
-              HEREDOC
-          end
-        end
-      end
     end
 
     describe "changed" do
@@ -139,6 +120,24 @@ describe "tests" do
         [0, 10, 255].each do |c|
           assert_stack [12, 34], "&&@", StringIO.new,
             StringIO.new.tap{ |s| "#{c.chr}-12#{c.chr}-34#{c.chr}".bytes.reverse_each &s.method(:ungetbyte) }
+        end
+      end
+      [
+        [[1, 3], "   00"],
+        [[2, 3], "   01"],
+        [[1, 4], "   10"],
+        [[2, 4], "   11"],
+        [[1, 3], "  1-0"],
+        [[1, 3], "   1-"],
+        [[1, 3], "1-01-"],
+      ].each do |expectation, code|
+        it "|_- #{code}" do
+          assert_stack expectation,
+            <<~HEREDOC
+              #{code}|
+                 41_13@
+                 42_23@
+            HEREDOC
         end
       end
     end
