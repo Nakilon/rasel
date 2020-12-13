@@ -58,7 +58,9 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
           stack.push c.to_i
         end
       when ?j
-        if 0 < t = pop[]
+        t = pop[]
+        error[] if 1 != t.denominator
+        if 0 < t
           t.to_i.times{ move[] }
         else
           reverse[]

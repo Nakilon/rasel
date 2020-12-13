@@ -144,10 +144,13 @@ describe "tests" do
     end
 
     describe "new" do
-      before do assert_equal 0, RASEL(?@).exitcode end
-
-      it "j"  do assert_stack [5, 6], "2j3456@" end
+      # TODO: non-instructional-like tests about jumping over spaces on the edges
+      it "j"  do assert_stack [1], "j1@" end
+      it 'j"'  do assert_stack [5, 6], '3j2"456@' end
       it "j-" do assert_stack [2, 3], "6-j123@" end
+      it "exit status code 255 on non-integer jump" do
+        assert_equal 255, RASEL("12/j@").exitcode
+      end
     end
 
   end

@@ -59,6 +59,9 @@ puts RASEL('"olleh",,,,,@').stdout.string
   * `&` -- read Base10 integer from STDIN and put onto the stack  
     EOF reverses the direction of the instruction pointer and does not put anything onto the stack.  
     Leading non-digit characters are omitted -- that allows to consecutively read numbers that have any non-digits characters in between.
+  * `j` -- "jump forward" -- pop a value from the stack and jump over that many cells in the current instruction pointer direction  
+    If value isn't integer the error is raised.  
+    If value is negative, jump is done the opposite direction but the instruction pointer direction does not change.
 
 ## Main differences from Befunge-93
 
@@ -71,8 +74,7 @@ puts RASEL('"olleh",,,,,@').stdout.string
 * instructions that are added
   * `A`..`Z` (case sensitive Base36)  
     push an integer from 10 to 35 onto the stack
-  * `j` ("jump forward" from Funge-98)  
-    pop a value N from the stack and jump over N cells in the current direction
+  * `j` ("jump forward" from Funge-98)
   * `a` ("take at" -- the Random Access thing)  
     pop a value N from the stack and duplicate the Nth value from the stack onto its top
 * instructions that are removed
@@ -96,7 +98,7 @@ puts RASEL('"olleh",,,,,@').stdout.string
   - [x] executable
   - [x] non-instructional
   - [ ] instructional
-    - [ ] old
+    - [x] old
       - [x] `"`, `#`
       - [x] `0`..`9`
       - [x] `$`, `:`, `\`
@@ -109,6 +111,6 @@ puts RASEL('"olleh",,,,,@').stdout.string
       - [ ] `|`, `_`
     - [ ] new
       - [x] `A`..`Z`
-      - [ ] `j`
+      - [x] `j`
       - [ ] `a`
       - [ ] something about additional stacks maybe
