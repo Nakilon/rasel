@@ -56,7 +56,7 @@ puts RASEL('"olleh",,,,,@').stdout.string
     If value isn't integer and isn't within 0..255 the error is raised.
   * `~` -- read character from STDIN and put onto the stack  
     EOF reverses the direction of the instruction pointer and does not put anything onto the stack.
-  * `&` -- read Base10 integer from STDIN and put onto the stack  
+  * `&` -- read Base10 non-negative integer from STDIN and put onto the stack  
     EOF reverses the direction of the instruction pointer and does not put anything onto the stack.  
     Leading non-digit characters are omitted -- that allows to consecutively read numbers that have any non-digits characters in between.
   * `j` -- "jump forward" -- pop a value from the stack and jump over that many cells in the current instruction pointer direction  
@@ -108,7 +108,7 @@ puts RASEL('"olleh",,,,,@').stdout.string
       - [x] `>`, `<`, `^`, `v`
       - [x] `-`, `/`, `%`
       - [x] `.`, `,`
-    - [ ] changed
+    - [x] changed
       - [x] `@`
       - [x] `~`, `&`
       - [x] `|`, `_`
@@ -116,4 +116,4 @@ puts RASEL('"olleh",,,,,@').stdout.string
       - [x] `A`..`Z`
       - [x] `j`
       - [ ] `a`
-      - [ ] something about additional stacks maybe
+      - [ ] TODO: maybe something about additional stacks

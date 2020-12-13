@@ -55,6 +55,7 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
         catch nil do
           nil until (?0..?9).include? c = getc[]
           while (?0..?9).include? cc = getc[] ; c << cc end
+          stdin.ungetbyte cc
           stack.push c.to_i
         end
       when ?j

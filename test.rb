@@ -118,7 +118,7 @@ describe "tests" do
       it "&" do
         assert_stack [2], "&1@2", StringIO.new, StringIO.new
         [0, 10, 255].each do |c|
-          assert_stack [12, 34], "&&@", StringIO.new,
+          assert_stack [12, 34, c], "&&~@", StringIO.new,
             StringIO.new.tap{ |s| "#{c.chr}-12#{c.chr}-34#{c.chr}".bytes.reverse_each &s.method(:ungetbyte) }
         end
       end
