@@ -92,6 +92,14 @@ describe "tests" do
       it "%" do assert_stack [0, 0, 1, 0, 0], "%%10%12%22%21%@" end
       it "/-" do assert_equal [-0.5], RASEL("1-2/0@").stack end
       it "%-" do assert_equal [1], RASEL("1-2%0@").stack end
+      it ".-" do assert_equal "0 10 255 0 ",        RASEL(".A."+"5-"*51+"-..@").stdout.string end
+      it ",-" do assert_equal "\x00\x0A\xFF\x00".b, RASEL(",A,"+"5-"*51+"-,,@").stdout.string end
+      it ".- negative float" do assert_equal "-0.3333333333333333 ", RASEL("13/-.@").stdout.string end
+      it ",- errors" do
+        assert_equal 255, RASEL("1-,@").exitcode
+        assert_equal 255, RASEL("GG*,@").exitcode
+        assert_equal 255, RASEL("12/,@").exitcode
+      end
 
       describe "(rely on 0..9, A..Z)" do
 
@@ -111,8 +119,6 @@ describe "tests" do
               HEREDOC
           end
         end
-        it ".-" do assert_equal "0 10 255 0 ",        RASEL(".A."+"5-"*51+"-..@").stdout.string end
-        it ",-" do assert_equal "\x00\x0A\xFF\x00".b, RASEL(",A,"+"5-"*51+"-,,@").stdout.string end
         it "~" do
           assert_stack [2], "~1@2", StringIO.new, StringIO.new
           assert_stack [0, 10, 255, 0], "~~~~@", StringIO.new,

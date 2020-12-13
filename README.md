@@ -29,7 +29,7 @@ puts RASEL('"olleh",,,,,@').stdout.string
 
 ## Reference specification
 
-* All the "errors raised" in this specification mean it should halt the program with any (depends on the implementation) exit status code from 1 to 255. The only undefined things in this specification are how float numbers are printed and how empty source file is treated. If you find anything else missing, please report since it should be defined.
+* All the "errors raised" in this specification mean it should halt the program with any (depends on the implementation) exit status code from 1 to 255. The only undefined things in this specification are how float numbers are printed (TODO: maybe implement the ability to specify precision?) and how empty source file is treated. If you find anything else missing, please report since it should be defined.
 * Programs are read as ASCII-8BIT lines splitted by 0x0A character. For every source code line trailing space characters are trimmed and then readded to reach the length defined by the highest x coordinate of any (including invalid) non-space character in the whole source file. Lines with no non-space characters at the end of the source file are trimmed. After the source code load the program space is effectively a rectangle of NxM characters that has at least one non-space character in the last column and in the last row too. Space characters are [nop](https://en.wikipedia.org/wiki/NOP_(code))s when not in the stringmode. All other characters that are not defined in the specification raise an error if the instruction pointer reaches them unless the previous instruction was "trampoline" so it's just skipped.
 * "Popping a value" means taking out the top value from the stack and using it in the instruction that initiated the popping. When stack is empty popping from it supplies 0. For language user it should be effectively indistinguishable if the stack is empty or has several 0 it in.
 * Instructions:
@@ -49,6 +49,8 @@ puts RASEL('"olleh",,,,,@').stdout.string
   * `>`, `<`, `^`, `v` -- change direction
   * `-`, `/`, `%` -- pop two values and push the result of an arithmetic operation  
     If divisor or modulus is 0 it's not an error and result is 0.
+  * `.` -- TODO
+  * `,` -- TODO
 
 ## Main differences from Befunge-93
 
@@ -88,13 +90,12 @@ puts RASEL('"olleh",,,,,@').stdout.string
   - [x] non-instructional
   - [ ] instructional
     - [ ] old
-      - [x] `"`
-      - [x] `#`
+      - [x] `"`, `#`
       - [x] `0`..`9`
       - [x] `$`, `:`, `\`
       - [x] `>`, `<`, `^`, `v`
       - [x] `-`, `/`, `%`
-      - [ ] `,`, `.`
+      - [x] `.`, `,`
     - [ ] changed
       - [x] `@`
       - [ ] `~`, `&`

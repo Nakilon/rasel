@@ -17,6 +17,7 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
   end
   reverse = ->{ dy, dx = -dy, -dx }
   stringmode = false
+  error = Proc.new{ return Struct.new(:stdout, :stack, :exitcode).new stdout, stack, 255 }
 
   loop do
     move[]
@@ -46,8 +47,8 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
       when ?% ; b, a = pop[], pop[]; stack.push (b.zero? ? 0 : a % b)
       when ?| ; pop[] <= 0 ? go_south[] : go_north[]
       when ?_ ; pop[] <= 0 ? go_east[] : go_west[]
-      when ?, ; stdout.print pop[].to_i.chr   # TODO: type exception
-      when ?. ; stdout.print "#{_ = pop[]; 1 == _.denominator ? _.to_i : _.to_f} "
+      when ?. ; stdout.print "#{_ = pop[]; 1 != _.denominator ? _.to_f : _.to_i} "
+      when ?, ; stdout.print "#{_ = pop[]; 1 != _.denominator ? error[] : _ < 0 || _ > 255 ? error[] : _.to_i.chr}"
       when ?~ ; if c = stdin.getbyte then stack.push c else reverse[] end
       when ?&
         getc = ->{ stdin.getc or (reverse[]; throw nil) }
@@ -67,7 +68,7 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
 
       ### RASEL
 
-      else ; return Struct.new(:stdout, :stack, :exitcode).new stdout, stack, 255
+      else ; error[]
     end
   end
 end
