@@ -1,5 +1,3 @@
-[![Test](https://github.com/Nakilon/rasel/workflows/.github/workflows/test.yaml/badge.svg)](https://github.com/Nakilon/rasel/actions)
-
 # RASEL (Random Access Stack Esoteric Language)
 
 A programming language inspired by Befunge.  
