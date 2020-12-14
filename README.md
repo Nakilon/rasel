@@ -3,7 +3,7 @@
 A programming language inspired by Befunge.  
 (Currently only Read is random. Write is still possible only to the top of the stack.)
 
-This repository includes the [documenation](#reference-specification), [examples](rasel/tree/master/examples), Ruby-based [interpreter](rasel/tree/master/lib), its [tests](rasel/blob/master/test.rb) and [Github Action](rasel/blob/master/.github/workflows/test.yaml) that runs them automatically.
+This repository includes the [documenation](#reference-specification), [examples](examples), Ruby-based [interpreter](lib), its [tests](test.rb) and [Github Action](.github/workflows/test.yaml) that runs them automatically.
 
 ## This implementation usage
 
@@ -96,7 +96,7 @@ rasel program.rasel < input.txt
   * `p` and `g` (put and get)  
     random stack access should make self-modification almost useless and simplify the implementation because program won't expand, also it might be easier for optimization
 
-## Examples (more [here](rasel/tree/master/examples))
+## Examples (more [here](examples))
 
 ### How do we check if the value is 0 if we have only the instruction that checks if it is positive?
 
