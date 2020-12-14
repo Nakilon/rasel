@@ -91,16 +91,46 @@ rasel program.rasel < input.txt
     because it wasn't much needed
   * `+` and `*` (addition and multiplication)  
     can be easily emulated using `-` and `/` (subtraction and division), removed just for the fun of it
-  * `` ` `` (if greater)  
-    can be easily emulated using `-` and `?`
-  * `!` (logical negation)
-    can be emulated too
+  * `` ` `` and `!` ("if greater" and "logical negation")  
+    can be easily emulated using other instructions
   * `p` and `g` (put and get)  
     random stack access should make self-modification almost useless and simplify the implementation because program won't expand, also it might be easier for optimization
 
+## Examples
+
+How do we check if the value is 0 if we have only the instruction that checks if it is positive? The naive approach would be to check if it is not positive and then additionally negate the value and check again. Here we make a list of values -2, -1, 0, +1, +2 and then check them:
+```
+2-01-012 5> :#@?1-\     :#v?$    v
+                          >0\-#v?v
+          ^  ,,,,,"true"A      <
+          ^ ,,,,,,"false"A       <
+```
+```
+$ rasel examples/naive_if_zero.rasel
+false
+false
+true
+false
+false
+```
+Then we can apply the idea that if you multiply the negative value by itself it will become positive or just remain 0. Of course we don't have the "multiply" instruction but the "divide" effectively works the same for us (and it does not raise an error when we divide by 0):
+```
+2-01-012 5> :#@?1-\     :/#v?v
+
+          ^  ,,,,,"true"A  <
+          ^ ,,,,,,"false"A   <
+```
+It became 2-3 times shorter but now we realise that after the division the value is either 0 or 1 so we can utilize the "jump" instruction to make it even shorter:
+```
+2-01-012 5> :#@?1-\     :/jvv
+
+          ^  ,,,,,"true"A  <
+          ^ ,,,,,,"false"A  <
+```
+
 ## TODO
 
-- [ ] some examples
+- [x] some examples
 - [ ] page at esolangs.org
 - [ ] announcement
 - [x] implementation, tests and docs
