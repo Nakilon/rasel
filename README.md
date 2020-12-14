@@ -1,7 +1,9 @@
 # RASEL (Random Access Stack Esoteric Language)
 
 A programming language inspired by Befunge.  
-Currently only Read is random. Write is still possible only to the top of the stack.
+(Currently only Read is random. Write is still possible only to the top of the stack.)
+
+This repository includes the [documenation](#reference-specification), [examples](rasel/tree/master/examples), Ruby-based [interpreter](rasel/tree/master/lib), its [tests](rasel/blob/master/test.rb) and [Github Action](rasel/blob/master/.github/workflows/test.yaml) that runs them automatically.
 
 ## This implementation usage
 
@@ -94,9 +96,11 @@ rasel program.rasel < input.txt
   * `p` and `g` (put and get)  
     random stack access should make self-modification almost useless and simplify the implementation because program won't expand, also it might be easier for optimization
 
-## Examples
+## Examples (more [here](rasel/tree/master/examples))
 
-How do we check if the value is 0 if we have only the instruction that checks if it is positive? The naive approach would be to check if it is not positive and then additionally negate the value and check again. Here we make a list of values -2, -1, 0, +1, +2 and then check them:
+### How do we check if the value is 0 if we have only the instruction that checks if it is positive?
+
+The naive approach would be to check if it is not positive and then additionally negate the value and check again. Here we make a list of values -2, -1, 0, +1, +2 and then check them:
 ```
 2-01-012 5> :#@?1-\     :#v?$    v
                           >0\-#v?v
@@ -125,6 +129,24 @@ It became 2-3 times shorter but now we realise that after the division the value
           ^  ,,,,,"true"A  <
           ^ ,,,,,,"false"A  <
 ```
+
+### AdventOfCode 2020 1 1 non-golfed solution
+
+Befunge-93 (by @fis):
+```befunge
+1+:#v&\fp
+   0>$1-:00p>:#v_00g
+               >:fg00gfg+'-:*5--#v_fg00gfg*.@
+            ^                  -1<
+```
+RASEL:
+```
+&#v
+  >2v        >$$$
+    >01--:a:#^?:4a0\--05--F/F/9/1-:/jv$
+                                     >\$1\//.@
+```
+Here you see that it's about the same size. Absence of `+` and `*` is compensated by `a`.
 
 ## TODO
 

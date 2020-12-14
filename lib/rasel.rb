@@ -7,18 +7,31 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
   pop = ->{ stack.pop || 0r }
   dx, dy = 1, 0
   x, y = -1, 0
+  history = {}
   move = lambda do
     y = (y + dy) % code.size
     x = (x + dx) % code[y].size
+    next unless ENV.key?("DEBUG_HISTORY") && code[y][x] == 32
+    history[[x, y]] ||= 0
+    history[[x, y]] += 1
   end
+  time = Time.now
+  thread = Thread.new do
+    loop do
+      unless Time.now < time + 1
+        time += 1
+        p history.sort_by(&:last).last(10)
+      end
+      sleep 0.1
+    end
+  end if ENV.key? "DEBUG_HISTORY"
   reverse = ->{ dy, dx = -dy, -dx }
   stringmode = false
   error = Proc.new{ return Struct.new(:stdout, :stack, :exitcode).new stdout, stack, 255 }
-
   loop do
     move[]
-    char = code[y][x] || 32r
-    STDERR.puts [char.chr, stringmode, stack].inspect if ENV["DEBUG"]
+    char = code[y][x]
+    STDERR.puts [char.chr, stringmode, (stack.last Integer ENV["DEBUG"] rescue stack)].inspect if ENV.key? "DEBUG"
     next stack.push char if stringmode && char.chr != ?"
     return Struct.new(:stdout, :stack, :exitcode).new stdout, stack, (
       t = pop[]
@@ -57,10 +70,12 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
         t = pop[]
         error[] if 1 != t.denominator
         if 0 < t
-          t.to_i.times{ move[] }
+          y = (y + dy * t.to_i) % code.size
+          x = (x + dx * t.to_i) % code[y].size
         else
           reverse[]
-          (-t).to_i.times{ move[] }
+          y = (y - dy * t.to_i) % code.size
+          x = (x - dx * t.to_i) % code[y].size
           reverse[]
         end
       when ?a
