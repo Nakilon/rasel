@@ -3,7 +3,7 @@
 A programming language inspired by Befunge.  
 (Currently only Read is random. Write is still possible only to the top of the stack.)
 
-This repository includes the [documenation](#reference-specification), [examples](examples), Ruby-based [interpreter](lib), its [tests](test.rb) and [Github Action](.github/workflows/test.yaml) that runs them automatically.
+This repository includes the [documenation](#reference-specification), [examples](examples), Ruby-based [interpreter](lib/rasel.rb), its [tests](test.rb) and [Github Action](.github/workflows/test.yaml) that runs them automatically.
 
 ## This implementation usage
 
@@ -146,7 +146,7 @@ RASEL:
     >01--:a:#^?:4a0\--05--F/F/9/1-:/jv$
                                      >\$1\//.@
 ```
-Here you see that it's about the same size. Absence of `+` and `*` is compensated by `a`.
+Here you can see that it's about the same size. Absence of `+` and `*` is compensated by `a`.
 
 ## TODO
 

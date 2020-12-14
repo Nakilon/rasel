@@ -9,6 +9,7 @@ Gem::Specification.new do |spec|
   spec.metadata     = {"source_code_uri" => "https://github.com/nakilon/rasel"}
 
   spec.add_development_dependency "minitest-around"
+  spec.add_development_dependency "ruby-prof"
 
   spec.test_file    = "test.rb"
   spec.files        = %w{ LICENSE rasel.gemspec lib/rasel.rb }
