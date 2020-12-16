@@ -19,7 +19,7 @@ describe "tests" do
       require "tempfile"
       begin
         file = Tempfile.new "temp.rasel"
-        file.write 'A"!dlroW ,olleH">:#@?,09-j'
+        file.write 'A"!dlroW ,olleH">:?@,Hj'
         file.flush
         string, status = Open3.capture2e "./bin/rasel #{file.path}"
       ensure
@@ -130,17 +130,17 @@ describe "tests" do
         end
       end
       [
-        [[0], ""],
-        [[1], "1"],
-        [[0], "1-"],
-        [[1], "12/"],
-        [[0], "12/-"],
+        [[1], ""],
+        [[0], "1"],
+        [[1], "1-"],
+        [[0], "12/"],
+        [[1], "12/-"],
       ].each do |expectation, code|
         it "? #{code}" do
-          assert_stack expectation, "#{code}\#@?1@"
-          assert_stack expectation, "v#{code}\#@?1@".chars.zip.transpose.join(?\n)
-          assert_stack expectation, "<@1?@\##{code.reverse}"
-          assert_stack expectation, "^@1?@\##{code.reverse}".chars.zip.transpose.join(?\n)
+          assert_stack expectation, "#{code}?1@"
+          assert_stack expectation, "v#{code}?1@".chars.zip.transpose.join(?\n)
+          assert_stack expectation, "<@1?#{code.reverse}"
+          assert_stack expectation, "^@1?#{code.reverse}".chars.zip.transpose.join(?\n)
         end
       end
     end

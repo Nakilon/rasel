@@ -57,11 +57,11 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
       when ?\\ ; stack.concat [pop[], pop[]]
       when ?/ ; b, a = pop[], pop[]; stack.push (b.zero? ? 0 : a / b)
       when ?% ; b, a = pop[], pop[]; stack.push (b.zero? ? 0 : a % b)
-      when ?> ; dx, dy =  1,  0
-      when ?< ; dx, dy = -1,  0
-      when ?^ ; dx, dy =  0, -1
       when ?v ; dx, dy =  0,  1
-      when ?? ; reverse[] if pop[] <= 0
+      when ?> ; dx, dy =  1,  0
+      when ?^ ; dx, dy =  0, -1
+      when ?< ; dx, dy = -1,  0
+      when ?? ; move[] if pop[] > 0
       when ?a
         t = pop[]
         error[] if 0 > t || 1 != t.denominator

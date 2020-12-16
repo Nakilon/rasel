@@ -67,8 +67,7 @@ rasel program.rasel < input.txt
   * `j` -- "jump forward" -- pop a value from the stack and jump over that many cells in the current instruction pointer direction  
     If the value isn't integer the error is raised.  
     If the value is negative, jump is done the opposite direction but the instruction pointer direction does not change.
-  * `?` -- "if" -- pop a value and do nothing if it's positive  
-    Reverse the direction of the instruction pointer if it's negative or 0.
+  * `?` -- "if positive" -- pop a value and work as "trampoline" if it's positive  
   * `a` -- "take at" -- pop a value N from the stack, then copy the Nth value from it to the top  
     If the top stack value is 0 or exceeds the size of stack then it's effectively the same as `$0`.  
     If the top stack value is 1 it's effectively the same as `$:`.  
@@ -85,10 +84,9 @@ rasel program.rasel < input.txt
   * `j` ("jump forward" from Funge-98)
   * `a` ("take at" -- the Random Access thing)  
     pop a value N from the stack and duplicate the Nth value from the stack onto its top
-* instructions `|` and `_` are replaced with a single instruction `?` that reverses current direction if the popped value is not positive
+* instructions `|` and `_` are replaced with a single instruction `?` that tests if the value is positive
 * instructions that are removed
-  * `?` (move to random direction)  
-    because it wasn't much needed
+  * `?` (move to random direction)
   * `+` and `*` (addition and multiplication)  
     can be easily emulated using `-` and `/` (subtraction and division), removed just for the fun of it
   * `` ` `` and `!` ("if greater" and "logical negation")  
@@ -102,10 +100,10 @@ rasel program.rasel < input.txt
 
 The naive approach would be to check if it is not positive and then additionally negate the value and check again. Here we make a list of values -2, -1, 0, +1, +2 and then check them:
 ```
-2-01-012 5> :#@?1-\     :#v?$    v
-                          >0\-#v?v
+2-01-012 5>  :?@1-\     :?v$    v
+                          >0\-?vv
           ^  ,,,,,"true"A      <
-          ^ ,,,,,,"false"A       <
+          ^ ,,,,,,"false"A      <
 ```
 ```
 $ rasel examples/naive_if_zero.rasel
@@ -117,18 +115,12 @@ false
 ```
 Then we can apply the idea that if you multiply the negative value by itself it will become positive or just remain 0. Of course we don't have the "multiply" instruction but the "divide" effectively works the same for us (and it does not raise an error when we divide by 0):
 ```
-2-01-012 5> :#@?1-\     :/#v?v
-
-          ^  ,,,,,"true"A  <
-          ^ ,,,,,,"false"A   <
-```
-It became 2-3 times shorter but now we realise that after the division the value is either 0 or 1 so we can utilize the "jump" instruction to make it even shorter:
-```
-2-01-012 5> :#@?1-\     :/jvv
+2-01-012 5>  :?@1-\     :/?vv
 
           ^  ,,,,,"true"A  <
           ^ ,,,,,,"false"A  <
 ```
+This is now 2-3 times shorter.
 
 ### AdventOfCode 2020 1 1 non-golfed solution
 
