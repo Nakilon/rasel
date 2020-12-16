@@ -7,8 +7,6 @@ This repository includes the [documenation](#reference-specification), [examples
 
 ## This implementation usage
 
-(right now the gem is in the development stage and is not published yet so you need to git clone it)
-
 Install:
 ```
 gem install rasel
@@ -120,7 +118,7 @@ Then we can apply the idea that if you multiply the negative value by itself it 
           ^  ,,,,,"true"A  <
           ^ ,,,,,,"false"A  <
 ```
-This is now 2-3 times shorter.
+This is 2-3 times shorter.
 
 ### AdventOfCode 2020 1 1 non-golfed solution
 
@@ -143,8 +141,10 @@ Here you can see that it's about the same size. Absence of `+` and `*` is compen
 ## TODO
 
 - [x] some examples
-- [ ] page at esolangs.org
+- [x] gemify
+- [x] page at esolangs.org
 - [ ] announcement
+- [ ] TODO: maybe random write
 - [x] implementation, tests and docs
   - [x] non-instructional
   - [x] executable
