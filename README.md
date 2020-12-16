@@ -94,6 +94,12 @@ rasel program.rasel < input.txt
 
 ## Examples (more [here](examples))
 
+### Hello, world
+
+```
+A"!dlroW ,olleH">:?@,Hj
+```
+
 ### How do we check if the value is 0 if we have only the instruction that checks if it is positive?
 
 The naive approach would be to check if it is not positive and then additionally negate the value and check again. Here we make a list of values -2, -1, 0, +1, +2 and then check them:
@@ -133,8 +139,8 @@ RASEL:
 ```
 &#v
   >2v        >$$$
-    >01--:a:#^?:4a0\--05--F/F/9/1-:/jv$
-                                     >\$1\//.@
+    >01--:a:?^:4a0\--05--F/F/9/1-:/?v$
+                                    >\$1\//.A,@
 ```
 Here you can see that it's about the same size. Absence of `+` and `*` is compensated by `a`.
 
@@ -143,7 +149,7 @@ Here you can see that it's about the same size. Absence of `+` and `*` is compen
 - [x] some examples
 - [x] gemify
 - [x] page at esolangs.org
-- [ ] announcement
+- [ ] announce
 - [ ] TODO: maybe random write
 - [x] implementation, tests and docs
   - [x] non-instructional
