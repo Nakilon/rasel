@@ -40,6 +40,7 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
     byte = code[y][x]
     char = byte.chr
     STDERR.puts [char, stringmode, (stack.last Integer ENV["DEBUG"] rescue stack)].inspect if ENV.key? "DEBUG"
+
     next stack.push byte if stringmode && char != ?"
     return Struct.new(:stdout, :stack, :exitcode).new stdout, stack, (
       t = pop[]
@@ -68,27 +69,21 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
         stack.push t.zero? ? 0 : stack[-t] || 0
       when ?. ; stdout.print "#{_ = pop[]; 1 != _.denominator ? _.to_f : _.to_i} "
       when ?, ; stdout.print "#{_ = pop[]; 1 != _.denominator ? error[] : _ < 0 || _ > 255 ? error[] : _.to_i.chr}"
-      when ?~ ; if c = stdin.getbyte then stack.push c else reverse[] end
+      when ?~ ; if _ = stdin.getbyte then stack.push _; move[] end
       when ?&
-        getc = ->{ stdin.getc or (reverse[]; throw nil) }
+        getc = ->{ stdin.getc or throw nil }
         catch nil do
           nil until (?0..?9).include? c = getc[]
-          while (?0..?9).include? cc = getc[] ; c << cc end
-          stdin.ungetbyte cc
+          while (?0..?9).include? cc = stdin.getc ; c << cc end
+          stdin.ungetbyte cc if cc
           stack.push c.to_i
+          move[]
         end
       when ?j
         t = pop[]
         error[] if 1 != t.denominator
-        if 0 < t
-          y = (y + dy * t.to_i) % code.size
-          x = (x + dx * t.to_i) % code[y].size
-        else
-          reverse[]
-          y = (y - dy * t.to_i) % code.size
-          x = (x - dx * t.to_i) % code[y].size
-          reverse[]
-        end
+        y = (y + dy * t.to_i) % code.size
+        x = (x + dx * t.to_i) % code[y].size
 
       else ; error[]
     end

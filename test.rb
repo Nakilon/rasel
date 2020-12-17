@@ -14,19 +14,17 @@ describe "tests" do
   end
 
   describe "executable" do
-    it "hello world" do
-      require "open3"
-      require "tempfile"
-      begin
-        file = Tempfile.new "temp.rasel"
-        file.write 'A"!dlroW ,olleH">:?@,Hj'
-        file.flush
-        string, status = Open3.capture2e "./bin/rasel #{file.path}"
-      ensure
-        file.close
-        file.unlink
+    require "open3"
+    [
+      ["helloworld.rasel", 0, "Hello, World!\n"],
+      ["naive_if_zero.rasel", 0, "false\nfalse\ntrue\nfalse\nfalse\n"],
+      ["short_if_zero.rasel", 0, "false\nfalse\ntrue\nfalse\nfalse\n"],
+      ["cat.rasel < examples/cat.rasel", 0, File.read("examples/cat.rasel")],
+    ].each do |cmd, expected_status, expected_stdout|
+      it cmd do
+        string, status = Open3.capture2e "./bin/rasel examples/#{cmd}"
+        assert_equal [expected_status, expected_stdout], [status.exitstatus, string]
       end
-      assert_equal [0, "Hello, World!\n"], [status.exitstatus, string]
     end
   end
 
@@ -118,15 +116,15 @@ describe "tests" do
         assert_equal 255, RASEL("12/@").exitcode
       end
       it "~" do
-        assert_stack [2], "~1@2", StringIO.new, StringIO.new
-        assert_stack [0, 10, 255, 0], "~~~~@", StringIO.new,
+        assert_stack [1], "~1@2", StringIO.new, StringIO.new
+        assert_stack [0, 10, 255, 0], "~0~0~0~0@", StringIO.new,
           StringIO.new.tap{ |s| [0, 10, 255, 0].reverse_each &s.method(:ungetbyte) }
       end
       it "&" do
-        assert_stack [2], "&1@2", StringIO.new, StringIO.new
+        assert_stack [1], "&1@2", StringIO.new, StringIO.new
         [0, 10, 255].each do |c|
-          assert_stack [12, 34, c], "&&~@", StringIO.new,
-            StringIO.new.tap{ |s| "#{c.chr}-12#{c.chr}-34#{c.chr}".bytes.reverse_each &s.method(:ungetbyte) }
+          assert_stack [12, 34, c, 56], "&0&0~0&0@", StringIO.new,
+            StringIO.new.tap{ |s| "#{c.chr}-12#{c.chr}-34#{c.chr}-56".bytes.reverse_each &s.method(:ungetbyte) }
         end
       end
       [

@@ -54,13 +54,12 @@ rasel program.rasel < input.txt
   * `-`, `/`, `%` -- pop two values and push the result of an arithmetic operation  
     If divisor or modulus is 0 it's not an error and result is 0.
   * `.` -- pop a value and print it as a number  
-    Print as integer or as float if there is a fractional part.
+    Print as an integer or as a float if there is a fractional part.
   * `,` -- pop a value and print it as a char of the corresponding ASCII code  
     If the value isn't an integer within 0..255 the error is raised.
-  * `~` -- read character from STDIN and put its ASCII code onto the stack  
-    EOF reverses the direction of the instruction pointer and does not put anything onto the stack.
-  * `&` -- read Base10 non-negative integer from STDIN and put onto the stack  
-    EOF reverses the direction of the instruction pointer and does not put anything onto the stack.  
+  * `~` -- read character from STDIN, put its ASCII code onto the stack and work as "trampoline" unless EOF  
+    EOF does not put anything onto the stack.
+  * `&` -- read Base10 non-negative integer from STDIN, put it onto the stack and work as "trampoline" unless EOF  
     Leading non-digit characters are omitted -- that allows to consecutively read numbers that have any non-digits characters in between.
   * `j` -- "jump forward" -- pop a value from the stack and jump over that many cells in the current instruction pointer direction  
     If the value isn't integer the error is raised.  
@@ -137,10 +136,10 @@ Befunge-93 (by @fis):
 ```
 RASEL:
 ```
-&#v
-  >2v        >$$$
-    >01--:a:?^:4a0\--05--F/F/9/1-:/?v$
-                                    >\$1\//.A,@
+&v
+ >2v        >$$$
+   >01--:a:?^:4a0\--05--F/F/9/1-:/?v$
+                                   >\$1\//.@
 ```
 Here you can see that it's about the same size. Absence of `+` and `*` is compensated by `a`.
 
