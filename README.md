@@ -11,23 +11,27 @@ Install:
 ```
 gem install rasel
 ```
-Now to print 'hello\n' and exit with 0 status code you can either use the executable to run a source file:
+Now to run a program and exit with 0 status code you can either use the executable and pass a source file as argument:
 ```bash
 echo '"olleh",,,,,A,@' > temp.rasel
 rasel temp.rasel
 ```
-Or pipe it:
+Or pipe the source code:
 ```bash
 echo '"olleh",,,,,A,@' | rasel
 ```
-Or call it from Ruby:
+Or pass it as a String arg in Ruby runtime:
 ```ruby
 require "rasel"
 puts RASEL('"olleh",,,,,@').stdout.string
 ```
-To run a program and feed it an input from a file:
+To run a program and feed it some stdin you can either put it to a file:
 ```bash
-rasel program.rasel < input.txt
+rasel my_program.rasel < my_input.txt
+```
+Or pipe it:
+```bash
+echo 10 | rasel examples/factorial.rasel
 ```
 
 ## Reference specification
