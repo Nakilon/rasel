@@ -31,7 +31,8 @@ rasel my_program.rasel < my_input.txt
 ```
 Or pipe it:
 ```bash
-echo 10 | rasel examples/factorial.rasel
+echo 5 | rasel examples/factorial.rasel
+echo 5 | rasel examples/fibonacci.rasel
 ```
 
 ## Reference specification
@@ -76,7 +77,6 @@ echo 10 | rasel examples/factorial.rasel
 
 ## Not all but the main differences from Befunge-93/98
 
-* `@` pops an exit status code from the stack (like `q` in [Funge-98](https://github.com/catseye/Funge-98))
 * stack and program space ("playfield" in [Befunge-93](https://github.com/catseye/Befunge-93) terminology) have no size limits
 * stack data type is Rational
 * instructions that are added
@@ -97,10 +97,18 @@ echo 10 | rasel examples/factorial.rasel
 
 ## Examples (more [here](examples))
 
-### Hello, world
+### Factorial ([OEIS A000142](https://oeis.org/A000142))
 
 ```
-A"!dlroW ,olleH">:?@,Hj
+1&v  >$.A,@
+  >:?^:14a//\1-
+```
+
+### Fibonacci ([OEIS A000045](https://oeis.org/A000045))
+
+```
+01&v    >$$.A,@
+   >1-:?^004a-5a--\
 ```
 
 ### How do we check if the value is 0 if we have only the instruction that checks if it is positive?
