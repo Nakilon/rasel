@@ -100,14 +100,14 @@ echo 5 | rasel examples/fibonacci.rasel
 ### Factorial ([OEIS A000142](https://oeis.org/A000142))
 
 ```
-1&v  >$.A,@
-  >:?^:14a//\1-
+1& v  >$.A,@
+   >:?^:14a//\1-
 ```
 
 ### Fibonacci ([OEIS A000045](https://oeis.org/A000045))
 
 ```
-01&v    >$$.A,@
+1& v    >$$.A,@
    >1-:?^004a-5a--\
 ```
 
@@ -154,6 +154,14 @@ RASEL:
                                    >\$1\//.@
 ```
 Here you can see that it's about the same size. Absence of `+` and `*` is compensated by `a`.
+
+## Development notes
+
+```bash
+bundle install
+bundle exec ruby test.rb
+```
+When using jruby you should set env var `CI` to bundle and run tests avoiding the `gem ruby-prof` installation failure.
 
 ## TODO
 

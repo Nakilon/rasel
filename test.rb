@@ -6,13 +6,8 @@ require_relative "lib/rasel"
 
 # TODO: assert that all RASEL() return with 0 exit code unless the opposite is expected
 
-describe "tests" do
-  around{ |test| Timeout.timeout(1){ test.call } }
-  def assert_stack expectation, *args
-    result = RASEL *args
-    assert_equal expectation.map(&:to_r), [*result.stack, result.exitcode]
-  end
-
+describe "bin" do
+  around{ |test| Timeout.timeout(RUBY_PLATFORM == "java" ? 4 : 1){ test.call } }
   describe "executable" do
     require "open3"
     [
@@ -20,12 +15,22 @@ describe "tests" do
       ["naive_if_zero.rasel", 0, "false\nfalse\ntrue\nfalse\nfalse\n"],
       ["short_if_zero.rasel", 0, "false\nfalse\ntrue\nfalse\nfalse\n"],
       ["cat.rasel < examples/cat.rasel", 0, File.read("examples/cat.rasel")],
-    ].each do |cmd, expected_status, expected_stdout|
+      ["fibonacci.rasel", 2, "3 \n", "echo 5 | "],
+      ["factorial.rasel", 120, "120 \n", "echo 5 | "],
+    ].each do |cmd, expected_status, expected_stdout, prefix|
       it cmd do
-        string, status = Open3.capture2e "./bin/rasel examples/#{cmd}"
+        string, status = Open3.capture2e "#{prefix}./bin/rasel examples/#{cmd}"
         assert_equal [expected_status, expected_stdout], [status.exitstatus, string]
       end
     end
+  end
+end
+
+describe "lib" do
+  around{ |test| Timeout.timeout(1){ test.call } }
+  def assert_stack expectation, *args
+    result = RASEL *args
+    assert_equal expectation.map(&:to_r), [*result.stack, result.exitcode]
   end
 
   describe "non-instructional" do
