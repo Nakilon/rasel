@@ -166,9 +166,9 @@ When using jruby you should set env var `CI` to bundle and run tests avoiding th
 ## TODO
 
 - [x] some examples
-- [x] gemify
-- [x] page at esolangs.org
-- [ ] announce
+- [x] [gemify](https://rubygems.org/gems/rasel)
+- [x] [page at esolangs.org](esolangs.org/wiki/rasel)
+- [x] [announce](https://www.reddit.com/r/esolangs/comments/lsjmrq/rasel_random_access_stack_esoteric_language/)
 - [ ] TODO: maybe random write
 - [x] implementation, tests and docs
   - [x] non-instructional
