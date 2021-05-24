@@ -15,7 +15,7 @@ describe "bin" do
       ["naive_if_zero.rasel", 0, "false\nfalse\ntrue\nfalse\nfalse\n"],
       ["short_if_zero.rasel", 0, "false\nfalse\ntrue\nfalse\nfalse\n"],
       ["cat.rasel < examples/cat.rasel", 0, File.read("examples/cat.rasel")],
-      ["fibonacci.rasel", 2, "3 \n", "echo 5 | "],
+      ["fibonacci.rasel", 0, "3 \n", "echo 5 | "],
       ["factorial.rasel", 120, "120 \n", "echo 5 | "],
     ].each do |cmd, expected_status, expected_stdout, prefix|
       it cmd do

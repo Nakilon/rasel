@@ -107,9 +107,27 @@ echo 5 | rasel examples/fibonacci.rasel
 ### Fibonacci ([OEIS A000045](https://oeis.org/A000045))
 
 ```
-1& v    >$$.A,@
-   >1-:?^004a-5a--\
+1&-:?v004a-5a--\
+     >4a.A,@
 ```
+
+### AdventOfCode 2020 1 1 solution
+
+Befunge-93 (by @fis):
+```befunge
+1+:#v&\fp
+   0>$1-:00p>:#v_00g
+               >:fg00gfg+'-:*5--#v_fg00gfg*.@
+            ^                  -1<
+```
+RASEL:
+```
+&v
+ >2v        >$$$
+   >01--:a:?^:4a0\--05--F/F/9/1-:/?v$
+                                   >\$1\//.@
+```
+Here you can see that it's about the same size. Absence of `+` and `*` is compensated by `a`.
 
 ### How do we check if the value is 0 if we have only the instruction that checks if it is positive?
 
@@ -136,24 +154,6 @@ Then we can apply the idea that if you multiply the negative value by itself it 
           ^ ,,,,,,"false"A  <
 ```
 This is 2-3 times shorter.
-
-### AdventOfCode 2020 1 1 non-golfed solution
-
-Befunge-93 (by @fis):
-```befunge
-1+:#v&\fp
-   0>$1-:00p>:#v_00g
-               >:fg00gfg+'-:*5--#v_fg00gfg*.@
-            ^                  -1<
-```
-RASEL:
-```
-&v
- >2v        >$$$
-   >01--:a:?^:4a0\--05--F/F/9/1-:/?v$
-                                   >\$1\//.@
-```
-Here you can see that it's about the same size. Absence of `+` and `*` is compensated by `a`.
 
 ## Development notes
 
