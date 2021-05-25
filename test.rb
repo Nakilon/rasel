@@ -11,12 +11,13 @@ describe "bin" do
   describe "executable" do
     require "open3"
     [
+      ["cat.rasel < examples/cat.rasel", 0, File.read("examples/cat.rasel")],
       ["helloworld.rasel", 0, "Hello, World!\n"],
       ["naive_if_zero.rasel", 0, "false\nfalse\ntrue\nfalse\nfalse\n"],
       ["short_if_zero.rasel", 0, "false\nfalse\ntrue\nfalse\nfalse\n"],
-      ["cat.rasel < examples/cat.rasel", 0, File.read("examples/cat.rasel")],
-      ["fibonacci.rasel", 0, "3 \n", "echo 5 | "],
-      ["factorial.rasel", 120, "120 \n", "echo 5 | "],
+      ["factorial.rasel", 0, "120 ", "echo 5 | "],
+      ["fibonacci.rasel", 5, "3 ", "echo 5 | "],
+      ["project_euler/1.rasel", 0, "233168 ", "echo 1000 | "],
     ].each do |cmd, expected_status, expected_stdout, prefix|
       it cmd do
         string, status = Open3.capture2e "#{prefix}./bin/rasel examples/#{cmd}"
@@ -30,7 +31,7 @@ describe "lib" do
   around{ |test| Timeout.timeout(1){ test.call } }
   def assert_stack expectation, *args
     result = RASEL *args
-    assert_equal expectation.map(&:to_r), [*result.stack, result.exitcode]
+    assert_equal expectation, [*result.stack, result.exitcode]
   end
 
   describe "non-instructional" do
@@ -89,7 +90,6 @@ describe "lib" do
       it "0..9, A..Z" do assert_stack [*0..35], "#{[*0..9].join}#{[*?A..?Z].join}@" end
       it "$"  do assert_stack [1], "$12$@" end
       it ":" do assert_stack [0, 0, 1, 1], ":1:@" end
-      it ?\\ do assert_stack [0, 1, 0], "\\1\\@" end
       it "><^v" do
         assert_stack [1, 2, 3, 4],
           <<~HEREDOC
@@ -146,6 +146,12 @@ describe "lib" do
           assert_stack expectation, "^@1?#{code.reverse}".chars.zip.transpose.join(?\n)
         end
       end
+      it "\\" do assert_stack [2, 0, 4, 0], "4321001-02-\\\\\\\\\\@" end
+      it "exit status code 255 on non-integer \\ index" do
+        assert_equal 0, RASEL("01/\\@").exitcode
+        assert_equal 255, RASEL("12/\\@").exitcode
+        assert_equal 255, RASEL("12/-\\@").exitcode
+      end
     end
 
     describe "new" do
@@ -155,11 +161,6 @@ describe "lib" do
       it "j-" do assert_stack [2, 3], "6-j123@" end
       it "exit status code 255 on non-integer jump" do
         assert_equal 255, RASEL("12/j@").exitcode
-      end
-      it "a:." do assert_equal "2 0 0 ", RASEL("21a:.a:.a:.@").stdout.string end
-      it "exit status code 255 on negative 'take at' argument" do
-        assert_equal 255, RASEL("1-a@").exitcode
-        assert_equal 255, RASEL("12/a@").exitcode
       end
     end
 

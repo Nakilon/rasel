@@ -5,7 +5,7 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
   lines = source.tap{ |_| fail "empty source" if _.empty? }.gsub(/ +$/,"").split(?\n)
   code = lines.map{ |_| _.ljust(lines.map(&:size).max).bytes }
   stack = []
-  pop = ->{ stack.pop || 0r }
+  pop = ->{ stack.pop || 0 }
   dx, dy = 1, 0
   x, y = -1, 0
 
@@ -49,24 +49,24 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
     case char
       when ?\s
 
-      when ?0..?9, ?A..?Z ; stack.push char.to_i(36).to_r
+      when ?0..?9, ?A..?Z ; stack.push char.to_i 36
       when ?" ; stringmode ^= true
       when ?# ; move[]
       when ?$ ; pop[]
       when ?: ; stack.concat [pop[]] * 2
       when ?- ; stack.push -(pop[] - pop[])
-      when ?\\ ; stack.concat [pop[], pop[]]
-      when ?/ ; b, a = pop[], pop[]; stack.push (b.zero? ? 0 : a / b)
-      when ?% ; b, a = pop[], pop[]; stack.push (b.zero? ? 0 : a % b)
+      when ?/ ; b, a = pop[], pop[]; stack.push (b.zero? ? 0 : Rational(a) / b)
+      when ?% ; b, a = pop[], pop[]; stack.push (b.zero? ? 0 : Rational(a) % b)
       when ?v ; dx, dy =  0,  1
       when ?> ; dx, dy =  1,  0
       when ?^ ; dx, dy =  0, -1
       when ?< ; dx, dy = -1,  0
       when ?? ; move[] if pop[] > 0
-      when ?a
+      when ?\\
         t = pop[]
-        error[] if 0 > t || 1 != t.denominator
-        stack.push t.zero? ? 0 : stack[-t] || 0
+        error[] if 1 != t.denominator
+        stack.unshift 0 until stack.size > t
+        stack[-t-1], stack[-1] = stack[-1], stack[-t-1] unless 0 > t
       when ?. ; stdout.print "#{_ = pop[]; 1 != _.denominator ? _.to_f : _.to_i} "
       when ?, ; stdout.print "#{_ = pop[]; 1 != _.denominator ? error[] : _ < 0 || _ > 255 ? error[] : _.to_i.chr}"
       when ?~ ; if _ = stdin.getbyte then stack.push _; move[] end

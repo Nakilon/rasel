@@ -1,11 +1,10 @@
-# RASEL (Random Access Stack Esoteric Language)
+# RASEL (Random Access Stack Esoteric Language) v1
 
-A programming language inspired by Befunge.  
-(Currently only Read is random. Write is still possible only to the top of the stack.)
+A programming language inspired by Befunge where instead of the program space random access you have an ability to swap with an Nth value in stack.
 
-This repository includes the [documenation](#reference-specification), [examples](examples), Ruby-based [interpreter](lib/rasel.rb), its [tests](test.rb) and [Github Action](.github/workflows/test.yaml) that runs them automatically.
+This repository includes [specification](#reference-specification), [examples](examples), [library](lib/rasel.rb) and [binary](bin/rasel), its [tests](test.rb) and [Github Action](.github/workflows/test.yaml) that runs them automatically.
 
-## This implementation usage
+## Usage
 
 Install:
 ```
@@ -34,6 +33,7 @@ Or pipe it:
 echo 5 | rasel examples/factorial.rasel
 echo 5 | rasel examples/fibonacci.rasel
 ```
+Environment variable `DEBUG` makes it print the current instruction, stack and stringmode.
 
 ## Reference specification
 
@@ -54,7 +54,10 @@ echo 5 | rasel examples/fibonacci.rasel
   * `0`..`9`, `A`..`Z` -- push single [Base36](https://en.wikipedia.org/wiki/Base36) digit value onto the stack
   * `$` -- "discard" -- pop a value and do nothing with it
   * `:` -- "duplicate" -- pop a value and add it back to the stack twice
-  * `\` -- "swap" -- pop a value twice and put them back in reverse order
+  * `\` -- "swapn" -- pop a value N from the stack, then swap the next one with the N+1th
+    If N isn't an integer the error is raised.  
+    If N is 0 or negative then nothing swaps and it's effectively the same as `$`.  
+    If N exceeds the current depth of the stack then the stack is extended with zeros as much as needed.
   * `>`, `<`, `^`, `v` -- set instruction pointer direction
   * `-`, `/`, `%` -- pop two values and push the result of an arithmetic operation  
     If divisor or modulus is 0 it's not an error and result is 0.
@@ -69,11 +72,7 @@ echo 5 | rasel examples/fibonacci.rasel
   * `j` -- "jump forward" -- pop a value from the stack and jump over that many cells in the current instruction pointer direction  
     If the value isn't integer the error is raised.  
     If the value is negative, jump is done the opposite direction but the instruction pointer direction does not change.
-  * `?` -- "if positive" -- pop a value and work as "trampoline" if it's positive  
-  * `a` -- "take at" -- pop a value N from the stack, then copy the Nth value from it to the top  
-    If the top stack value is 0 or exceeds the size of stack then it's effectively the same as `$0`.  
-    If the top stack value is 1 it's effectively the same as `$:`.  
-    If the top stack value is negative or is not integer the error is raised.
+  * `?` -- "if positive" -- pop a value and work as "trampoline" if it's positive
 
 ## Not all but the main differences from Befunge-93/98
 
@@ -83,33 +82,72 @@ echo 5 | rasel examples/fibonacci.rasel
   * `A`..`Z` (case sensitive Base36)  
     push an integer from 10 to 35 onto the stack
   * `j` ("jump forward" from Funge-98)
-  * `a` ("take at" -- the Random Access thing)  
-    pop a value N from the stack and duplicate the Nth value from the stack onto its top
+* instruction `\` ("swapn" -- the Random Access thing)
+  pop a value N from the stack and swap the next one with the N+1th
 * instructions `|` and `_` are replaced with a single instruction `?` that tests if the value is positive
 * instructions that are removed
-  * `?` (move to random direction)
+  * `?` (move to a random direction)
   * `+` and `*` (addition and multiplication)  
     can be easily emulated using `-` and `/` (subtraction and division), removed just for the fun of it
   * `` ` `` and `!` ("if greater" and "logical negation")  
     can be easily emulated using other instructions
   * `p` and `g` (put and get)  
-    random stack access should make self-modification almost useless and simplify the implementation because program won't expand, also it might be easier for optimization
+    random stack access makes self-modification almost useless and simplifies the implementation because the program space won't expand, also it might be easier for optimization
 
 ## Examples (more [here](examples))
 
 ### Factorial ([OEIS A000142](https://oeis.org/A000142))
 
 ```
-1& v  >$.A,@
-   >:?^:14a//\1-
+1&$:?v:1-3\$/1\
+     >$11\/.A,@
 ```
 
 ### Fibonacci ([OEIS A000045](https://oeis.org/A000045))
 
 ```
-1&-:?v004a-5a--\
-     >4a.A,@
+1&-:?v2\:2\01\--2\
+     >$.A,@
 ```
+
+### Project Euler's [Problem 1 "Multiples of 3 and 5"](https://projecteuler.net/problem=1)
+
+```
+&>:?v1-::3%1\5%/ ?v
+ ^  >--.@j5\1--\3:<
+```
+
+### How do we check if the value is 0 if we have only the instruction that checks if it is positive?
+
+The naive approach would be to check if it is not positive and then additionally negate the value and check again. Here we make a list of values -2, -1, 0, +1, +2 and then check them:
+```
+2-01-012 5>  :?@1-1\    :?v$     v
+                          >01\-?vv
+          ^  ,,,,,"true"A       <
+          ^ ,,,,,,"false"A       <
+```
+```
+$ rasel examples/naive_if_zero.rasel
+false
+false
+true
+false
+false
+```
+Then we can apply the idea that if you multiply the negative value by itself it will become positive or just remain 0. Of course we don't have the "multiply" instruction but the "divide" effectively works the same for us (and it does not raise an error when we divide by 0):
+```
+2-01-012 5>  :?@1-1\    :/?vv
+
+          ^  ,,,,,"true"A  <
+          ^ ,,,,,,"false"A  <
+```
+This is 2-3 times shorter.
+
+## Breaking change note
+
+Initial version of RASEL was v0. The v1 introduced the `\` parameter and deprecated the `a`.
+
+## Outdated (v0) examples
 
 ### AdventOfCode 2020 1 1 solution
 
@@ -129,38 +167,8 @@ RASEL:
 ```
 Here you can see that it's about the same size. Absence of `+` and `*` is compensated by `a`.
 
-### How do we check if the value is 0 if we have only the instruction that checks if it is positive?
-
-The naive approach would be to check if it is not positive and then additionally negate the value and check again. Here we make a list of values -2, -1, 0, +1, +2 and then check them:
-```
-2-01-012 5>  :?@1-\     :?v$    v
-                          >0\-?vv
-          ^  ,,,,,"true"A      <
-          ^ ,,,,,,"false"A      <
-```
-```
-$ rasel examples/naive_if_zero.rasel
-false
-false
-true
-false
-false
-```
-Then we can apply the idea that if you multiply the negative value by itself it will become positive or just remain 0. Of course we don't have the "multiply" instruction but the "divide" effectively works the same for us (and it does not raise an error when we divide by 0):
-```
-2-01-012 5>  :?@1-\     :/?vv
-
-          ^  ,,,,,"true"A  <
-          ^ ,,,,,,"false"A  <
-```
-This is 2-3 times shorter.
-
 ## Development notes
 
-```bash
-bundle install
-bundle exec ruby test.rb
-```
 When using jruby you should set env var `CI` to bundle and run tests avoiding the `gem ruby-prof` installation failure.
 
 ## TODO
@@ -169,7 +177,7 @@ When using jruby you should set env var `CI` to bundle and run tests avoiding th
 - [x] [gemify](https://rubygems.org/gems/rasel)
 - [x] [page at esolangs.org](esolangs.org/wiki/rasel)
 - [x] [announce](https://www.reddit.com/r/esolangs/comments/lsjmrq/rasel_random_access_stack_esoteric_language/)
-- [ ] TODO: maybe random write
+- [x] minimal instruction set enough for random write
 - [x] implementation, tests and docs
   - [x] non-instructional
   - [x] executable
@@ -185,8 +193,8 @@ When using jruby you should set env var `CI` to bundle and run tests avoiding th
       - [x] `@`
       - [x] `~`, `&`
       - [x] `?`
+      - [x] `\`
     - [x] new
       - [x] `A`..`Z`
       - [x] `j`
-      - [x] `a`
       - [ ] TODO: maybe something about additional stacks
