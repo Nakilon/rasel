@@ -1,21 +1,25 @@
 # RASEL (Random Access Stack Esoteric Language) v1
 
-A programming language inspired by Befunge where instead of the program space random access you have an ability to swap with an Nth value in stack.
+A programming language inspired by Befunge where instead of the program space random access you have the ability to swap with the Nth value in stack.
 
-This repository includes [specification](#reference-specification), [examples](examples), [library](lib/rasel.rb) and [binary](bin/rasel), its [tests](test.rb) and [Github Action](.github/workflows/test.yaml) that runs them automatically.
+This repository includes [specification](#reference-specification), [examples](examples), [executable](bin/rasel) and [library](lib/rasel.rb), its [tests](test.rb) and [Github Action](.github/workflows/test.yaml) that runs them automatically.
 
 ## Usage
 
-Install:
+### Install
+
 ```
 gem install rasel
 ```
-Now to run a program and exit with 0 status code you can either use the executable and pass a source file as argument:
+
+### Run
+
+To run a program you can either use the executable and pass a source file as argument:
 ```bash
 echo '"olleh",,,,,A,@' > temp.rasel
 rasel temp.rasel
 ```
-Or pipe the source code:
+Or pipe the source code directly:
 ```bash
 echo '"olleh",,,,,A,@' | rasel
 ```
@@ -28,33 +32,42 @@ To run a program and feed it some stdin you can either put it to a file:
 ```bash
 rasel my_program.rasel < my_input.txt
 ```
-Or pipe it:
+Or pipe it too:
 ```bash
 echo 5 | rasel examples/factorial.rasel
 echo 5 | rasel examples/fibonacci.rasel
 ```
-Environment variable `DEBUG` makes it print the current instruction, stack and stringmode.
+Environment variable `DEBUG` makes it print the current instruction, stack and stringmode like this:
+```none
+["&", false, []]
+[":", false, [10]]
+["?", false, [10, 10]]
+["1", false, [10]]
+["-", false, [10, 1]]
+[":", false, [9]]
+...
+```
 
 ## Reference specification
 
-* All the "errors raised" in this specification mean it should halt the program with any (depends on the implementation) [exit status code](https://en.wikipedia.org/wiki/Exit_status) from 1 to 255. The only undefined things in this specification are how float numbers are printed (TODO: maybe implement the ability to specify precision?) and how empty source file is treated. If you find anything else missing, please report since it should be defined.
-* Programs are read as ASCII-8BIT lines splitted by 0x0A character. For every source code line trailing space characters are trimmed and then readded to reach the length defined by the highest x coordinate of any (including invalid) non-space character in the whole source file. Lines with no non-space characters at the end of the source file are trimmed. After the source code load the program space is effectively a rectangle of NxM characters that has at least one non-space character in the last column and in the last row too. Space characters are [nop](https://en.wikipedia.org/wiki/NOP_(code))s when not in the "stringmode". All other characters that are not defined in the specification raise an error if the instruction pointer reaches them unless the previous instruction was "trampoline" so it's just skipped.
+* Every "error raised" in this specification mean it should halt the program with any (depends on the implementation) [exit status code](https://en.wikipedia.org/wiki/Exit_status) from 1 to 255. The only currently known undefined things are how float numbers are printed (TODO: maybe implement the ability to specify precision?) and how empty source file is treated. If you find anything else missing, please report.
+* Programs are read as ASCII-8BIT lines splitted by 0x0A character. For every source code line trailing space characters are trimmed and then readded to reach the length defined by the highest x coordinate of any (including invalid) non-space character in the whole source file. Lines with no non-space characters at the end of the source file are trimmed. After the source code load the program space is effectively a rectangle of NxM characters that has at least one non-space character in the last column and in the last row. Space characters are [nop](https://en.wikipedia.org/wiki/NOP_(code))s when not in the "stringmode". All other characters that are not defined in the specification raise an error if the instruction pointer reaches them unless the previous instruction was "trampoline" so it's just skipped.
 * Stack data type is [Rational](https://en.wikipedia.org/wiki/Rational_data_type). Numerators and denominators are bignums, i.e. there should be no [rounding errors](https://en.wikipedia.org/wiki/Round-off_error). The "is integer" in this specification means "does not have a [fractional part](https://en.wikipedia.org/wiki/Fractional_part)".
-* "Popping a value" means taking out the top value from the stack and using it in the instruction that initiated the popping. When stack is empty popping from it supplies 0. For language user it should be effectively indistinguishable if the stack is empty or just has several 0 left it in.
+* "Popping a value" means taking out the top value from the stack and using it in the instruction that initiated the popping. When stack is empty popping from it creates 0. For language user it should be effectively indistinguishable if the stack is empty or just has several 0 left in it.
 * Instructions:
-  * `@` -- exit with code taken from the stack  
+  * `@` -- exit with code popped from the stack  
     If the value isn't integer and isn't within 0..255 the error is raised.
   * `"` -- toggle "stringmode" (by default is off)  
     In this mode all instruction and invalid (i.e. having no meaning as an instruction) characters are pushed onto the stack as a corresponding number from ASCII table.  
     In this mode space character (that is nop by default) is treated as an instruction to push the value 32 onto the stack.
   * `#` -- "trampoline" -- the character under the next instruction pointer position will be ignored  
-    If it's the last character on the source code line the first character on the other side of line will be skipped.  
-    If it's the last instruction on the source code line but not the last character (i.e. there are spaces or invalid characters filling it to the edge of the program space rectangle) the ignored character will be the next character on this line, not some character on the other side of it.  
+    If it's the last character on the source code line the first character on the other side of the line will be skipped.  
+    If it's the last instruction on the source code line but not the last character (i.e. there are spaces or invalid characters filling it to the edge of the program space rectangle) the next character will the ignored, not from the other side of the rectangle.  
     Same about source code columns and in both directions.
   * `0`..`9`, `A`..`Z` -- push single [Base36](https://en.wikipedia.org/wiki/Base36) digit value onto the stack
   * `$` -- "discard" -- pop a value and do nothing with it
   * `:` -- "duplicate" -- pop a value and add it back to the stack twice
-  * `\` -- "swapn" -- pop a value N from the stack, then swap the next one with the N+1th
+  * `\` -- "swapn" -- pop a value N from the stack, then swap the next one with the N+1th  
     If N isn't an integer the error is raised.  
     If N is 0 or negative then nothing swaps and it's effectively the same as `$`.  
     If N exceeds the current depth of the stack then the stack is extended with zeros as much as needed.
@@ -63,11 +76,12 @@ Environment variable `DEBUG` makes it print the current instruction, stack and s
     If divisor or modulus is 0 it's not an error and result is 0.
   * `.` -- pop a value and print it as a number  
     Print as an integer or as a float if there is a fractional part.
-  * `,` -- pop a value and print it as a char of the corresponding ASCII code  
+  * `,` -- pop a value and print it as a corresponding ASCII char  
     If the value isn't an integer within 0..255 the error is raised.
   * `~` -- read character from STDIN, put its ASCII code onto the stack and work as "trampoline" unless EOF  
     EOF does not put anything onto the stack.
   * `&` -- read Base10 non-negative integer from STDIN, put it onto the stack and work as "trampoline" unless EOF  
+    EOF does not put anything onto the stack.  
     Leading non-digit characters are omitted -- that allows to consecutively read numbers that have any non-digits characters in between.
   * `j` -- "jump forward" -- pop a value from the stack and jump over that many cells in the current instruction pointer direction  
     If the value isn't integer the error is raised.  
@@ -145,7 +159,7 @@ This is 2-3 times shorter.
 
 ## Breaking change note
 
-Initial version of RASEL was v0. The v1 introduced the `\` parameter and deprecated the `a`.
+Initial version of RASEL was v0. The v1 introduced the "swapn" and deprecated the "take at".
 
 ## Outdated (v0) examples
 
@@ -166,10 +180,6 @@ RASEL:
                                    >\$1\//.@
 ```
 Here you can see that it's about the same size. Absence of `+` and `*` is compensated by `a`.
-
-## Development notes
-
-When using jruby you should set env var `CI` to bundle and run tests avoiding the `gem ruby-prof` installation failure.
 
 ## TODO
 
@@ -198,3 +208,7 @@ When using jruby you should set env var `CI` to bundle and run tests avoiding th
       - [x] `A`..`Z`
       - [x] `j`
       - [ ] TODO: maybe something about additional stacks
+
+## Development notes
+
+When using jruby you should set env var `CI` to bundle and run tests avoiding the `gem ruby-prof` installation failure.
