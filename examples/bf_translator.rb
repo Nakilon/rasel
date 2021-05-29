@@ -25,7 +25,7 @@ loop do
     append.call "1\\1-\\$"
   when ?,
     append.call ":02--"
-    append.call "~ "
+    append.call "~@"
     append.call "1\\\\$"
   when ?>
     append.call "01--"
@@ -51,6 +51,7 @@ code.each{ |line| puts line.map{ |c| c || " " }.join }
 __END__
 
 Tape isn't limited in positive direction. Going negative exits with 255.
+Reading from EOF stdin results in exit with undefined code.
 Befunge code isn't validated, i.e. invalid usage of [ and ] leads to undefined behaviour.
 
 $ echo "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++." | ruby bf_translator.rb > temp
