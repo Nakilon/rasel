@@ -167,3 +167,16 @@ describe "lib" do
   end
 
 end
+
+describe "other" do
+  def assert_stack expectation, *args
+    result = RASEL *args
+    assert_equal expectation, [*result.stack, result.exitcode]
+  end
+  it "constants" do
+    File.foreach("constants.txt").with_index do |line, i|
+      s = 256.times.map{ rand(35)+1 }
+      assert_stack [*s,i+1,0], "#{s.map{|_|_.to_s(36).upcase}.join}G1G//j#{"@"*256}#{line.chomp}0@"
+    end
+  end
+end
