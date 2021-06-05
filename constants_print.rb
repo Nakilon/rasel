@@ -1,11 +1,25 @@
 require "rasel"
+
 h = []
-a = [*?0..?9, *?A..?Z]
-a.product(a) do |i, j|
-  c = "#{i}1#{j}//"
-  code = "#{c}0@"
-  result = RASEL(code).stack.last
-  h[result] = h[result] || []
-  h[result].push c
+l = lambda do |p, s, t, &b|
+  s.each do |a|
+    c = "#{p}#{t % a}"
+    r = RASEL "#{c}0@"
+    fail unless r.exitcode.zero?
+    unless 0 > result = r.stack.last
+      h[result] = h[result] || []
+      h[result].push c
+    end
+    b.call c if b
+  end
 end
-h.each_with_index{ |e, i| puts(("#{e.sort_by{ |_| [_.delete("^0-9A-Z").chars.max || "0", _.reverse] }.join " "}" if e)) }
+
+l.call("", ([*32..126]-[34]).map(&:chr), "\"%s\"")
+a = [*?0..?9, *?A..?Z]
+l.call("", a, "%s") do |b|
+  l.call(b, a, "1%s//") do |b|
+    l.call(b, a, "%s-")
+  end
+end
+
+h.each_with_index{ |e, i| puts(("#{e.sort_by{ |_| [_.size, _.delete("^0-9A-Z").chars.max || "0", _.reverse] }.take(1).join "\t"}" if e)) }
