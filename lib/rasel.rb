@@ -1,6 +1,7 @@
 Encoding::default_internal = Encoding::default_external = "ASCII-8BIT"
 END { RubyProf::FlatPrinter.new(RubyProf.stop).print STDERR, min_percent: 1 } if ENV["PROFILE"]
 
+RASELResultStruct = Struct.new(:stdout, :stack, :exitcode)
 def RASEL source, stdout = StringIO.new, stdin = STDIN
   lines = source.tap{ |_| fail "empty source" if _.empty? }.gsub(/ +$/,"").split(?\n)
   code = lines.map{ |_| _.ljust(lines.map(&:size).max).bytes }
@@ -10,10 +11,11 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
   x, y = -1, 0
 
   history = {}
+  debug_history = ENV.key? "DEBUG_HISTORY"
   move = lambda do
     y = (y + dy) % code.size
     x = (x + dx) % code[y].size
-    next unless ENV.key?("DEBUG_HISTORY") && code[y][x] == 32
+    next unless debug_history && code[y][x] == 32
     history[[x, y]] ||= 0
     history[[x, y]] += 1
   end
@@ -26,7 +28,7 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
       end
       sleep 0.1
     end
-  end if ENV.key? "DEBUG_HISTORY"
+  end if debug_history
   if ENV["PROFILE"]
     require "ruby-prof"
     RubyProf.start
@@ -35,21 +37,23 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
   reverse = ->{ dy, dx = -dy, -dx }
   stringmode = false
   error = Proc.new{ return Struct.new(:stdout, :stack, :exitcode).new stdout, stack, 255 }
+  debug = ENV.key? "DEBUG"
   loop do
     move[]
     byte = code[y][x]
     char = byte.chr
-    STDERR.puts [char, stringmode, (stack.last Integer ENV["DEBUG"] rescue stack)].inspect if ENV.key? "DEBUG"
+    STDERR.puts [char, stringmode, (stack.last Integer ENV["DEBUG"] rescue stack)].inspect if debug
 
     next stack.push byte if stringmode && char != ?"
-    return Struct.new(:stdout, :stack, :exitcode).new stdout, stack, (
+    return RASELResultStruct.new stdout, stack, (
       t = pop[]
       1 != t.denominator || t < 0 || t > 255 ? 255 : t.to_i
     ) if char == ?@
     case char
       when ?\s
 
-      when ?0..?9, ?A..?Z ; stack.push char.to_i 36
+      when ?0..?9 ; stack.push byte - 48
+      when ?A..?Z ; stack.push byte - 55
       when ?" ; stringmode ^= true
       when ?# ; move[]
       when ?$ ; pop[]

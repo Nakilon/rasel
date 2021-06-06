@@ -1,4 +1,4 @@
-require "rasel"
+require_relative "lib/rasel"
 
 h = []
 l = lambda do |p, s, t, &b|
@@ -17,7 +17,7 @@ end
 
 a = ([*32..126]-[34]).map(&:chr)
 l.call("", a, "\"%s\"")
-l.call("", a.product([" "], a).map(&:join), "\"%s\"//")
+l.call("", a.product(a, a).map(&:join), "\"%s\"//")
 a = [*?0..?9, *?A..?Z]
 l.call("", a, "%s") do |b|
   l.call(b, a, "1%s//") do |b|
