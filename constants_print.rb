@@ -6,7 +6,8 @@ l = lambda do |p, s, t, &b|
     c = "#{p}#{t % a}"
     r = RASEL "#{c}0@"
     fail unless r.exitcode.zero?
-    unless 0 > result = r.stack.last
+    result = r.stack.last
+    unless 0 > result || result.denominator != 1
       h[result] = h[result] || []
       h[result].push c
     end
@@ -14,7 +15,9 @@ l = lambda do |p, s, t, &b|
   end
 end
 
-l.call("", ([*32..126]-[34]).map(&:chr), "\"%s\"")
+a = ([*32..126]-[34]).map(&:chr)
+l.call("", a, "\"%s\"")
+l.call("", a.product([" "], a).map(&:join), "\"%s\"//")
 a = [*?0..?9, *?A..?Z]
 l.call("", a, "%s") do |b|
   l.call(b, a, "1%s//") do |b|
@@ -22,4 +25,4 @@ l.call("", a, "%s") do |b|
   end
 end
 
-h.each_with_index{ |e, i| puts(("#{e.sort_by{ |_| [_.size, _.delete("^0-9A-Z").chars.max || "0", _.reverse] }.take(1).join "\t"}" if e)) }
+h.each_with_index{ |e, i| puts(("#{e.sort_by{ |_| [_.size, _.delete("^0-9A-Za-z").chars.max || "0", _.reverse] }.take(1).join "\t"}" if e)) }
