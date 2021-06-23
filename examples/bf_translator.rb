@@ -2,6 +2,7 @@ x = y = 0
 code = [[]]
 stack = []
 append = ->str{ str.chars{ |c| code[y][x] = c; x += 1 } }
+append.call "3"
 e = $<.read.delete("^-+<>[].,").each_char
 optim = lambda do |c|
   n = 1
@@ -12,34 +13,32 @@ end
 loop do
   case e.next
   when ?-
-    append.call ":03--::\\"
+    append.call ":::\\"
     append.call "#{optim.call ?-}G1G//%"
     append.call "1\\1-\\$"
   when ?+
-    append.call ":03--::\\"
+    append.call ":::\\"
     append.call "0#{optim.call ?+}-G1G//%"
     append.call "1\\1-\\$"
   when ?.
-    append.call ":03--::\\"
+    append.call ":::\\"
     append.call ":,"
     append.call "1\\1-\\$"
   when ?,
-    append.call ":02--"
-    append.call "~@"
-    append.call "1\\\\$"
+    append.call ":~@"
+    append.call "1\\1-\\$"
   when ?>
     append.call "01--"
   when ?<
-    append.call ":?@1-"
+    append.call ":3-?@1-"
   when ?[
     t = x
-    append.call "v            >1\\1-\\$"
+    append.call "v        >1\\1-\\$"
     x = t
     stack.push y
     y = code.size
     code.push []
-    append.call ">:03--::\\"
-    append.call          "::/?^1\\1-\\$"
+    append.call ">:::\\::/?^1\\1-\\$"
   when ?]
     y = stack.pop
   end
@@ -55,6 +54,6 @@ Brainfuck code isn't validated, i.e. invalid usage of [ and ] leads to undefined
 
 $ echo "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++." | ruby bf_translator.rb > temp
 $ wc -c temp
-1919
+1669
 $ rasel temp
 Hello World!
