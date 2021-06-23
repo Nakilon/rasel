@@ -30,7 +30,7 @@ loop do
   when ?>
     append.call "01--"
   when ?<
-    append.call "1-:01--?@"
+    append.call ":?@1-"
   when ?[
     t = x
     append.call "v            >1\\1-\\$"
@@ -55,6 +55,6 @@ Brainfuck code isn't validated, i.e. invalid usage of [ and ] leads to undefined
 
 $ echo "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++." | ruby bf_translator.rb > temp
 $ wc -c temp
-2011
+1919
 $ rasel temp
 Hello World!
