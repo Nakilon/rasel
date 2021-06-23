@@ -7,7 +7,7 @@ optim = lambda do |c|
   n = 1
   (e.next; n += 1) while c == (e.peek rescue StopIteration)
   a, b = n.divmod(35)
-  [*([?G]*a), b].map{ |d| "#{d.to_s 36}-".upcase }.join
+  [*([35]*a), b].map{ |d| "#{d.to_s 36}-".upcase unless d.zero? }.join
 end
 loop do
   case e.next
