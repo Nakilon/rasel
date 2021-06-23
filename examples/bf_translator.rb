@@ -52,7 +52,7 @@ __END__
 
 Tape isn't limited in positive direction. Going negative exits with 255.
 Reading from EOF stdin results in exit with undefined code.
-Befunge code isn't validated, i.e. invalid usage of [ and ] leads to undefined behaviour.
+Brainfuck code isn't validated, i.e. invalid usage of [ and ] leads to undefined behaviour.
 
 $ echo "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++." | ruby bf_translator.rb > temp
 $ wc -c temp
