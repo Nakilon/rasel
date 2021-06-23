@@ -42,7 +42,6 @@ loop do
     append.call          "::/?^1\\1-\\$"
   when ?]
     y = stack.pop
-    append.call ">"
   end
 end
 append.call "0@"
@@ -56,6 +55,6 @@ Brainfuck code isn't validated, i.e. invalid usage of [ and ] leads to undefined
 
 $ echo "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++." | ruby bf_translator.rb > temp
 $ wc -c temp
-2017
+2011
 $ rasel temp
 Hello World!
