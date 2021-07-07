@@ -149,32 +149,6 @@ RASEL:
 ```
 Here you can see that it's about the same size.
 
-### How do we check if the value is 0 if we have only the instruction that checks if it is positive?
-
-The naive approach would be to check if it is not positive and then additionally negate the value and check again. Here we make a list of values -2, -1, 0, +1, +2 and then check them:
-```
-2-01-012 5>  :?@1-1\    :?v$     v
-                          >01\-?vv
-          ^  ,,,,,"true"A       <
-          ^ ,,,,,,"false"A       <
-```
-```
-$ rasel examples/naive_if_zero.rasel
-false
-false
-true
-false
-false
-```
-Then we can apply the idea that if you multiply the negative value by itself it will become positive or just remain 0. Of course we don't have the "multiply" instruction but the "divide" effectively works the same for us (and it does not raise an error when we divide by 0):
-```
-2-01-012 5>  :?@1-1\    :/?vv
-
-          ^  ,,,,,"true"A  <
-          ^ ,,,,,,"false"A  <
-```
-This is 2-3 times shorter.
-
 ## Breaking change note
 
 Initial version of RASEL was v0. The v1 introduced the "swapn" and deprecated the "take at".
