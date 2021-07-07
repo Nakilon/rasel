@@ -131,6 +131,24 @@ Environment variable `DEBUG` makes it print the current instruction, stack and s
  ^  >--.@j5\1--\3:<
 ```
 
+### Advent of Code [2020 1 1](https://adventofcode.com/2020/day/1) solution
+
+Befunge-93 (by @fis):
+```befunge
+1+:#v&\fp
+   0>$1-:00p>:#v_00g
+               >:fg00gfg+'-:*5--#v_fg00gfg*.@
+            ^                  -1<
+```
+RASEL:
+```
+&v
+ >2v         >$$$$
+   >01--::\:?^:0:5\:6\---K/"e"-:/?v1\1-\
+                                  >1:4\//.A,@
+```
+Here you can see that it's about the same size.
+
 ### How do we check if the value is 0 if we have only the instruction that checks if it is positive?
 
 The naive approach would be to check if it is not positive and then additionally negate the value and check again. Here we make a list of values -2, -1, 0, +1, +2 and then check them:
@@ -160,26 +178,6 @@ This is 2-3 times shorter.
 ## Breaking change note
 
 Initial version of RASEL was v0. The v1 introduced the "swapn" and deprecated the "take at".
-
-## Outdated (v0) examples
-
-### AdventOfCode 2020 1 1 solution
-
-Befunge-93 (by @fis):
-```befunge
-1+:#v&\fp
-   0>$1-:00p>:#v_00g
-               >:fg00gfg+'-:*5--#v_fg00gfg*.@
-            ^                  -1<
-```
-RASEL:
-```
-&v
- >2v        >$$$
-   >01--:a:?^:4a0\--05--F/F/9/1-:/?v$
-                                   >\$1\//.@
-```
-Here you can see that it's about the same size. Absence of `+` and `*` is compensated by `a`.
 
 ## TODO
 
