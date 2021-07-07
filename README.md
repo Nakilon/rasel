@@ -57,6 +57,10 @@ Environment variable `DEBUG` makes it print the current instruction, stack and s
 * Instructions:
   * `@` -- exit with code popped from the stack  
     If the value isn't integer and isn't within 0..255 the error is raised.
+  * `0`..`9`, `A`..`Z` -- push single [Base36](https://en.wikipedia.org/wiki/Base36) digit value onto the stack
+  * `$` -- "discard" -- pop a value and do nothing with it
+  * `:` -- "duplicate" -- pop a value and add it back to the stack twice
+  * `>`, `<`, `^`, `v` -- set instruction pointer direction
   * `"` -- toggle "stringmode" (by default is off)  
     In this mode all instruction and invalid (i.e. having no meaning as an instruction) characters are pushed onto the stack as a corresponding number from ASCII table.  
     In this mode space character (that is nop by default) is treated as an instruction to push the value 32 onto the stack.
@@ -64,14 +68,10 @@ Environment variable `DEBUG` makes it print the current instruction, stack and s
     If it's the last character on the source code line the first character on the other side of the line will be skipped.  
     If it's the last instruction on the source code line but not the last character (i.e. there are spaces or invalid characters filling it to the edge of the program space rectangle) the next character will the ignored, not from the other side of the rectangle.  
     Same about source code columns and in both directions.
-  * `0`..`9`, `A`..`Z` -- push single [Base36](https://en.wikipedia.org/wiki/Base36) digit value onto the stack
-  * `$` -- "discard" -- pop a value and do nothing with it
-  * `:` -- "duplicate" -- pop a value and add it back to the stack twice
   * `\` -- "swapn" -- pop a value N from the stack, then swap the next one with the N+1th  
     If N isn't an integer the error is raised.  
     If N is 0 or negative then nothing swaps and it's effectively the same as `$`.  
     If N exceeds the current depth of the stack then the stack is extended with zeros as much as needed.
-  * `>`, `<`, `^`, `v` -- set instruction pointer direction
   * `-`, `/`, `%` -- pop two values and push the result of an arithmetic operation  
     If divisor or modulus is 0 it's not an error and result is 0.
   * `.` -- pop a value and print it as a number  
@@ -131,6 +131,19 @@ Environment variable `DEBUG` makes it print the current instruction, stack and s
  ^  >--.@j5\1--\3:<
 ```
 
+### Prime numbers generator
+
+```
+2v
+ >:4v     >1\1-\2-1\:.1\\$ 01--
+    >::\:?^:3\1\%?v2-\1\:2\01--
+ ^                >2-\$    01--
+```
+```none
+$ rasel examples/prime.rasel
+2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61 67 71 73 79 83 89 97 101 103 ... ^C
+```
+
 ### Advent of Code [2020 1 1](https://adventofcode.com/2020/day/1) solution
 
 Befunge-93 (by @fis):
@@ -157,7 +170,7 @@ Initial version of RASEL was v0. The v1 introduced the "swapn" and deprecated th
 
 - [x] some examples
 - [x] [gemify](https://rubygems.org/gems/rasel)
-- [x] [page at esolangs.org](esolangs.org/wiki/rasel)
+- [x] [page at esolangs.org](https://esolangs.org/wiki/rasel)
 - [x] [announce](https://www.reddit.com/r/esolangs/comments/lsjmrq/rasel_random_access_stack_esoteric_language/)
 - [x] minimal instruction set enough for random write
 - [x] implementation, tests and docs
