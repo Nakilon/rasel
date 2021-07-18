@@ -16,7 +16,7 @@ describe "bin" do
       ["naive_if_zero.rasel", 0, "false\nfalse\ntrue\nfalse\nfalse\n"],
       ["short_if_zero.rasel", 0, "false\nfalse\ntrue\nfalse\nfalse\n"],
       ["factorial.rasel", 0, "120 ", "echo 5 | "],
-      ["fibonacci.rasel", 5, "3 ", "echo 5 | "],
+      ["fibonacci.rasel", 89, "55 ", "echo 10 | "],
       ["project_euler/1.rasel", 0, "233168 ", "echo 1000 | "],
     ].each do |cmd, expected_status, expected_stdout, prefix|
       it cmd do
