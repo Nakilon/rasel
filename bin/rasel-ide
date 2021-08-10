@@ -12,8 +12,13 @@ get "/jquery.js" do
   send_file "#{__dir__}/../jquery-3.6.0.min.js"
 end
 require "json"
-get "/load" do
+
+get "/read" do
   JSON.dump({status: :success, data: File.read(ARGV.first)})
+end
+post "/write" do
+  File.write ARGV.first, JSON.pretty_generate(JSON.load params["dump"])
+  JSON.dump({status: :success})
 end
 get "/" do
   <<~HEREDOC
@@ -25,6 +30,7 @@ get "/" do
       <script src="jquery.js" type="text/javascript"></script>
       <script type="text/javascript">
         window.onload = function() {
+
           window.jsend = function(mtd, path, options, callback) {
             $("#preloader").show();
             $[mtd](path, options).fail( function(xhr) {
@@ -40,6 +46,32 @@ get "/" do
               $("#preloader").hide();
             } );
           };
+
+          $("input").keyup( function(event) {
+            if (event.keyCode != 13) return;
+            if ($("input").val().length)
+              window.selected_cell.css("background-color", "#eee")[0].dataset.a = $("input").val();
+            else {
+              window.selected_cell.css("background-color", "")[0];
+              delete window.selected_cell[0].dataset.a;
+            };
+            let dump = [];
+            $("#grid").children().each( function(i, row) {
+              $(row).children().each( function(j, cell) {
+                if (cell.innerText.length || cell.dataset.a) dump.push([i, j, cell.innerText, cell.dataset.a]);
+              } );
+            } );
+            jsend("post", "write", {dump: JSON.stringify(dump)}, ()=>{});
+          } );
+
+          window.create_span = function() {
+            return $("<span></span>").click( function() {
+              if (window.selected_cell) window.selected_cell.css("border-color", "white");
+              window.selected_cell = $(this);
+              window.selected_cell.css("border-color", "black");
+              $("input").val(this.dataset.a);
+            } );
+          };
           window.add_row_adder = function() {
             const i = $("#row_adders").children().length;
             $("<span>+</span>").click( function() {
@@ -50,13 +82,18 @@ get "/" do
                 row.insertAfter($(`#grid>*:eq(${i-1})`));
               else
                 row.prependTo($("#grid"));
-              while (w--) $("<span>0</span>").appendTo(row);
+              while (w--) create_span().appendTo(row);
             } ).appendTo($("#row_adders"));
             if (i == 0) return;
             $("<span>✕</span>").click( function() {
               $("#row_adders>*").last().remove();
               $("#row_removers>*").last().remove();
+              let removed = false;
+              $($("#grid").children()[i-1]).children().each( function() {
+                if (selected_cell[0] == this) removed = true;
+              } );
               $("#grid").children()[i-1].remove();
+              if (removed) $("#grid>*:eq(0)>*:eq(0)").click();
             } ).appendTo($("#row_removers"));
           };
           window.add_column_adder = function() {
@@ -65,36 +102,42 @@ get "/" do
               add_column_adder();
               $("#grid").children().each( function() {
                 if (i && $(this).children().length)
-                  $("<span>1</span>").insertAfter($(this).children()[i-1]);
+                  create_span().insertAfter($(this).children()[i-1]);
                 else
-                  $("<span>2</span>").prependTo($(this));
+                  create_span().prependTo($(this));
               } );
             } ).appendTo($("#column_adders"));
             if (i == 0) return;
             $("<span>✕</span>").click( function() {
               $("#column_adders>*").last().remove();
               $("#column_removers>*").last().remove();
-              $("#grid").children().each( function() { $(this).children()[i-1].remove() } );
+              let removed = false;
+              $("#grid").children().each( function() {
+                if (selected_cell[0] == $(this).children()[i-1]) removed = true;
+                $($(this).children()[i-1]).remove();
+              } );
+              if (removed) $("#grid>*:eq(0)>*:eq(0)").click();
             } ).appendTo($("#column_removers"));
           };
-          window.add_row_adder();
-          window.add_column_adder();
-          jsend("get", "load", null, function(data) {
+          add_row_adder();
+          add_column_adder();
+
+          jsend("get", "read", null, function(data) {
             const code = JSON.parse(data);
-            code.map( function([x, y]) {
-              console.log(x);
+            code.forEach( function([y, x, c, a]) {
+              while(y >= $("#row_removers").children().length) $("#row_adders").children().last().click();
+              while(x >= $("#column_removers").children().length) $("#column_adders").children().last().click();
+              $(`#grid>*:eq(${y})>*:eq(${x})`).text(c).click();
+              if (a) $("input").val(a).trigger($.Event("keyup", {keyCode: 13}));
             } );
+            $("#grid>*:eq(0)>*:eq(0)").click();
           } );
-          window.annotate = function(input) {
-            if (event.key != "Enter") return;
-            //jsend_post("/api", "", {input: input.value}, function(data){ $("pre").html(data) });
-          };
         };
       </script>
-    <body style="margin: 0; padding-left: 1rem; padding-right: 1rem; padding-top: 0.5rem; padding-bottom: 0.5rem; font-family: monospace; font-size: xx-large">
+    <body style="margin: 0; padding-left: 1rem; padding-right: 1rem; padding-bottom: 0.5rem; font-family: monospace; font-size: xx-large">
       <style>
         span{
-          display: inline-block; line-height: 1.2rem; min-width: 1.2rem; max-height: 1.2rem; text-align: center;
+          display: inline-block; line-height: 1.2rem; min-width: 1.2rem; max-height: 1.2rem; min-height: 1.2rem; text-align: center;
           border: 1px; border-style: solid; border-color: white;
         }
       </style>
@@ -108,7 +151,9 @@ get "/" do
                     no-repeat center center;
         background-size: 10%;
       "></div>
-      <input type="text" style="width: 100%" onkeydown="annotate(this)">
+      <div style="display: flex">
+        <input type="text" style="flex: auto; margin: 1rem">
+      </div>
       <div style="
         display: grid;
         grid-template-rows: repeat(2, max-content max-content auto);
