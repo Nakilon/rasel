@@ -47,14 +47,7 @@ get "/" do
             } );
           };
 
-          $("input").keyup( function(event) {
-            if (event.keyCode != 13) return;
-            if ($("input").val().length)
-              window.selected_cell.css("background-color", "#eee")[0].dataset.a = $("input").val();
-            else {
-              window.selected_cell.css("background-color", "")[0];
-              delete window.selected_cell[0].dataset.a;
-            };
+          window.post_code = function() {
             let dump = [];
             $("#grid").children().each( function(i, row) {
               $(row).children().each( function(j, cell) {
@@ -62,6 +55,25 @@ get "/" do
               } );
             } );
             jsend("post", "write", {dump: JSON.stringify(dump)}, ()=>{});
+          };
+          $("input").keyup( function(event) {
+            event.stopPropagation();
+            if (event.keyCode != 13) return;
+            if ($("input").val().length)
+              window.selected_cell.css("background-color", "#eee")[0].dataset.a = $("input").val();
+            else {
+              window.selected_cell.css("background-color", "")[0];
+              delete window.selected_cell[0].dataset.a;
+            };
+            post_code();
+          } );
+          $("body").keyup( function(event) {
+            if (!event.key) return;
+            const char = (event.key == "Delete" || event.key == "Backspace") ? "" :
+                          event.key.length == 1 ? event.key : null;
+            if (!char) return;
+            window.selected_cell[0].innerText = char;
+            post_code();
           } );
 
           window.create_span = function() {
@@ -94,7 +106,9 @@ get "/" do
               } );
               $("#grid").children()[i-1].remove();
               if (removed) $("#grid>*:eq(0)>*:eq(0)").click();
+              post_code();
             } ).appendTo($("#row_removers"));
+            post_code();
           };
           window.add_column_adder = function() {
             const i = $("#column_adders").children().length;
@@ -117,7 +131,9 @@ get "/" do
                 $($(this).children()[i-1]).remove();
               } );
               if (removed) $("#grid>*:eq(0)>*:eq(0)").click();
+              post_code();
             } ).appendTo($("#column_removers"));
+            post_code();
           };
           add_row_adder();
           add_column_adder();
@@ -163,7 +179,7 @@ get "/" do
         <div id="column_removers" style="grid-column: 3; display: flex; padding-left: 0.5rem"></div>
         <div id="row_adders" style="grid-row: 3; display: flex; flex-direction: column"></div>
         <div id="row_removers" style="grid-row: 3; display: flex; flex-direction: column; padding-top: 0.5rem"></div>
-        <div id="grid" style="grid-row: 3; padding-top: 0.5rem; padding-left: 0.5rem"></div>
+        <div id="grid" style="grid-row: 3; padding-top: 0.4rem; padding-left: 0.5rem"></div>
       </div>
     </body>
   </html>
