@@ -1,0 +1,129 @@
+#!/usr/bin/env ruby
+
+abort "usage:\t#{__FILE__} <file.rasela>" unless 1 == ARGV.size
+abort "invalid directory" unless File.directory? File.dirname File.expand_path ARGV.first
+require "json"
+File.write ARGV.first, JSON.pretty_generate([[0,0,"@"]]) unless File.exist? ARGV.first
+abort "the argument should be a file" unless File.file? ARGV.first if File.exist? ARGV.first
+
+require "sinatra"
+require "sinatra/reloader"
+get "/jquery.js" do
+  send_file "#{__dir__}/../jquery-3.6.0.min.js"
+end
+require "json"
+get "/load" do
+  JSON.dump({status: :success, data: File.read(ARGV.first)})
+end
+get "/" do
+  <<~HEREDOC
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="utf-8">
+      <title>RASEL IDE</title>
+      <script src="jquery.js" type="text/javascript"></script>
+      <script type="text/javascript">
+        window.onload = function() {
+          window.jsend = function(mtd, path, options, callback) {
+            $("#preloader").show();
+            $[mtd](path, options).fail( function(xhr) {
+              alert(xhr.responseText || "something went wrong");
+            } ).done( function(text) {
+              const json = JSON.parse(text);
+              if (json.status == "error")
+                alert("SERVER ERROR: " + json.message);
+              else if (json.status == "success") {
+                callback(json.data);
+              } else alert("server response is weird");
+            } ).always( function() {
+              $("#preloader").hide();
+            } );
+          };
+          window.add_row_adder = function() {
+            const i = $("#row_adders").children().length;
+            $("<span>+</span>").click( function() {
+              add_row_adder();
+              const row = $("<span style='display: flex'></span>");
+              let w = $("#column_removers").children().length;
+              if (i && w)
+                row.insertAfter($(`#grid>*:eq(${i-1})`));
+              else
+                row.prependTo($("#grid"));
+              while (w--) $("<span>0</span>").appendTo(row);
+            } ).appendTo($("#row_adders"));
+            if (i == 0) return;
+            $("<span>✕</span>").click( function() {
+              $("#row_adders>*").last().remove();
+              $("#row_removers>*").last().remove();
+              $("#grid").children()[i-1].remove();
+            } ).appendTo($("#row_removers"));
+          };
+          window.add_column_adder = function() {
+            const i = $("#column_adders").children().length;
+            $("<span>+</span>").click( function() {
+              add_column_adder();
+              $("#grid").children().each( function() {
+                if (i && $(this).children().length)
+                  $("<span>1</span>").insertAfter($(this).children()[i-1]);
+                else
+                  $("<span>2</span>").prependTo($(this));
+              } );
+            } ).appendTo($("#column_adders"));
+            if (i == 0) return;
+            $("<span>✕</span>").click( function() {
+              $("#column_adders>*").last().remove();
+              $("#column_removers>*").last().remove();
+              $("#grid").children().each( function() { $(this).children()[i-1].remove() } );
+            } ).appendTo($("#column_removers"));
+          };
+          window.add_row_adder();
+          window.add_column_adder();
+          jsend("get", "load", null, function(data) {
+            const code = JSON.parse(data);
+            code.map( function([x, y]) {
+              console.log(x);
+            } );
+          } );
+          window.annotate = function(input) {
+            if (event.key != "Enter") return;
+            //jsend_post("/api", "", {input: input.value}, function(data){ $("pre").html(data) });
+          };
+        };
+      </script>
+    <body style="margin: 0; padding-left: 1rem; padding-right: 1rem; padding-top: 0.5rem; padding-bottom: 0.5rem; font-family: monospace; font-size: xx-large">
+      <style>
+        span{
+          display: inline-block; line-height: 1.2rem; min-width: 1.2rem; max-height: 1.2rem; text-align: center;
+          border: 1px; border-style: solid; border-color: white;
+        }
+      </style>
+      <div id="preloader" style="
+        position: fixed;
+        width: 100%; height: 100%;
+        left: 0; top: 0;
+        overflow: visible; z-index: 999;
+        background: hsla(0,0%,95%,0.8)
+                    url(&quot;data:image/svg+xml,%3Csvg fill='%23000000' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3Cpath d='M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42C16.07 4.74 14.12 4 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z'/%3E%3C/svg%3E&quot;)
+                    no-repeat center center;
+        background-size: 10%;
+      "></div>
+      <input type="text" style="width: 100%" onkeydown="annotate(this)">
+      <div style="
+        display: grid;
+        grid-template-rows: repeat(2, max-content max-content auto);
+        grid-template-columns: repeat(2, max-content max-content auto);
+      ">
+        <div id="column_adders" style="grid-column: 3; display: flex"></div>
+        <div id="column_removers" style="grid-column: 3; display: flex; padding-left: 0.5rem"></div>
+        <div id="row_adders" style="grid-row: 3; display: flex; flex-direction: column"></div>
+        <div id="row_removers" style="grid-row: 3; display: flex; flex-direction: column; padding-top: 0.5rem"></div>
+        <div id="grid" style="grid-row: 3; padding-top: 0.5rem; padding-left: 0.5rem"></div>
+      </div>
+    </body>
+  </html>
+  HEREDOC
+end
+
+# require_relative "../lib/rasel"
+# exit RASEL(ARGF.read, STDOUT).exitcode

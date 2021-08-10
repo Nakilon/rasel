@@ -8,11 +8,12 @@ Gem::Specification.new do |spec|
   spec.license      = "MIT"
   spec.metadata     = {"source_code_uri" => "https://github.com/nakilon/rasel"}
 
+  spec.add_dependency "sinatra"
   spec.add_development_dependency "minitest-around"
   spec.add_development_dependency "ruby-prof" unless ENV["CI"]
 
   spec.bindir       = "bin"
   spec.executable   = "rasel"
   spec.test_file    = "test.rb"
-  spec.files        = %w{ LICENSE rasel.gemspec lib/rasel.rb bin/rasel }
+  spec.files        = %w{ LICENSE rasel.gemspec lib/rasel.rb bin/rasel bin/rasel-ide }
 end
