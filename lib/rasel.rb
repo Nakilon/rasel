@@ -1,6 +1,7 @@
 Encoding::default_internal = Encoding::default_external = "ASCII-8BIT"
 END { RubyProf::FlatPrinter.new(RubyProf.stop).print STDERR, min_percent: 1 } if ENV["PROFILE"]
 
+require "delegate"
 class RASELStackItem < DelegateClass Rational
   attr_reader :annotation
   def initialize n, annotation
