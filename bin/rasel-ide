@@ -11,15 +11,7 @@ require "sinatra"
 get "/jquery.js" do
   send_file "#{__dir__}/../jquery-3.6.0.min.js"
 end
-require "json"
 
-get "/read" do
-  JSON.dump({status: :success, data: File.read(ARGV.first)})
-end
-post "/write" do
-  File.write ARGV.first, JSON.pretty_generate(JSON.load params["dump"])
-  JSON.dump({status: :success})
-end
 get "/" do
   <<~HEREDOC
   <!DOCTYPE html>
@@ -30,7 +22,6 @@ get "/" do
       <script src="jquery.js" type="text/javascript"></script>
       <script type="text/javascript">
         window.onload = function() {
-
           window.jsend = function(mtd, path, options, callback) {
             $("#preloader").show();
             $[mtd](path, options).fail( function(xhr) {
@@ -47,6 +38,43 @@ get "/" do
             } );
           };
 
+          $("textarea").keyup( function(event) {
+            event.stopPropagation();
+          } );
+
+          $("button").click( function() {
+            jsend("post", "run", {stdin: JSON.stringify($("textarea").val())}, function(data) {
+              console.log(data);
+              const [stdout, exitstatus] = data;
+              $("#result").empty().
+                append(`<div><b>EXIT CODE:</b> ${exitstatus}</div>`).
+                append("<div><b>LOG:</b></div>");//.append(stdout);
+              stdout.forEach( function(msg) {
+                const [reason, str] = JSON.parse(msg);
+                const div = $("<div style='display: flex; gap: 0.3rem; align-items: baseline'></div>").appendTo($("#result"));
+                switch (reason) {
+                  case "print":
+                    div.text("print:").append(`<span>${str}</span>`);
+                    break;
+                  case "loop":
+                    div.text("stack:");
+                    str.forEach( function(item) {
+                      const div_item = $("<div class='stackitem'></div>").appendTo(div);
+                      if (item instanceof Array) {
+                        const [value, annotation] = item;
+                        div_item.append(value);
+                        $("<div style='font-size: xx-small'></div>").text(annotation).appendTo(div_item);
+                      } else {
+                        div_item.append(item);
+                      };
+                    } );
+                    break;
+                  default:
+                    div.text("unknown msg type:").append(`<span>${reason}</span>`);
+                };
+              } );
+            } );
+          } );
           window.post_code = function() {
             let dump = [];
             $("#grid").children().each( function(i, row) {
@@ -56,6 +84,7 @@ get "/" do
             } );
             jsend("post", "write", {dump: JSON.stringify(dump)}, ()=>{});
           };
+
           window.annotate = function() {
               window.selected_cell.css("background-color", "#eee")[0].dataset.a = $("input").val();
           };
@@ -176,6 +205,11 @@ get "/" do
           display: inline-block; line-height: 1.2rem; min-width: 1.2rem; max-height: 1.2rem; min-height: 1.2rem; text-align: center;
           border: 1px; border-style: solid; border-color: white;
         }
+        label{ font-size: initial }
+        .stackitem{
+          flex-direction: column; display: flex; align-items: center;
+          background: #eee; padding-left: 0.2rem; padding-right: 0.2rem; margin-top: 0.2rem;
+        }
       </style>
       <div id="preloader" style="
         position: fixed;
@@ -187,9 +221,14 @@ get "/" do
                     no-repeat center center;
         background-size: 10%;
       "></div>
-      <div style="display: flex">
+      <label>STDIN:</label>
+      <textarea style="flex: auto; margin: 1rem; height: 2rem; vertical-align: middle"></textarea>
+      <button>RUN</button>
+      <div style="display: flex; align-items: baseline">
+        <label>Selected cell annotation:</label>
         <input type="text" style="flex: auto; margin: 1rem">
       </div>
+      <hr>
       <div style="
         display: grid;
         grid-template-rows: repeat(2, max-content max-content auto);
@@ -201,10 +240,35 @@ get "/" do
         <div id="row_removers" style="grid-row: 3; display: flex; flex-direction: column; padding-top: 0.5rem"></div>
         <div id="grid" style="grid-row: 3; padding-top: 0.4rem; padding-left: 0.5rem"></div>
       </div>
+      <hr>
+      <div id="result" style="font-size: initial"></div>
     </body>
   </html>
   HEREDOC
 end
 
-# require_relative "../lib/rasel"
-# exit RASEL(ARGF.read, STDOUT).exitcode
+get "/read" do
+  JSON.dump({status: :success, data: File.read(ARGV.first)})
+end
+post "/write" do
+  File.write ARGV.first, JSON.pretty_generate(JSON.load params["dump"])
+  JSON.dump({status: :success})
+end
+
+require_relative "../lib/rasel"
+require "open3"
+post "/run" do
+  begin
+    result = Timeout.timeout(2) do
+      RASEL \
+        JSON.load(File.read ARGV.first),
+        StringIO.new,
+        StringIO.new.tap{ |_| JSON.load(params.fetch "stdin").bytes.reverse_each &_.method(:ungetbyte) }
+    end
+    JSON.dump({status: :success, data: [result.stdout.string.split("\n"), result.exitcode]})
+  rescue Timeout::Error
+    # TODO: test this branch
+    JSON.dump({status: :error, message: :timeout, data: ["", 0]})
+  end
+end
+

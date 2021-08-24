@@ -31,7 +31,7 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
       define_singleton_method :puts do |str, reason|
         next if prev == dump = JSON.dump([reason, str])
         old_puts.call prev = dump
-        if 10_000_000 < stdout.pos - pos
+        if 1_000_000 < stdout.pos - pos
           old_puts.call JSON.dump [:exit, "printed size"]
           error.call
         end
@@ -46,7 +46,7 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
   dx, dy = 1, 0
   x, y = -1, 0
 
-  # debugging and profiling
+  # debugging and profiling (currently not maintained)
   history = {}
   debug_history = ENV.key? "DEBUG_HISTORY"
   move = lambda do
@@ -94,13 +94,13 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
     case char
       when ?\s
 
-      when ?0..?9 ; stack.push byte - 48
-      when ?A..?Z ; stack.push byte - 55
+      when ?0..?9 ; stack.push RASELStackItem.new byte - 48, annotation
+      when ?A..?Z ; stack.push RASELStackItem.new byte - 55, annotation
       when ?" ; stringmode ^= true
       when ?# ; move[]
       when ?$ ; pop[]
       when ?: ; popped = pop[]; stack.push popped; stack.push RASELStackItem.new popped, annotation
-      when ?- ; stack.push -(pop[] - pop[])
+      when ?- ; stack.push RASELStackItem.new -(pop[] - pop[]), annotation
       when ?/ ; b, a = pop[], pop[]; stack.push RASELStackItem.new b.zero? ? 0 : Rational(a) / b, annotation
       when ?% ; b, a = pop[], pop[]; stack.push RASELStackItem.new b.zero? ? 0 : Rational(a) % b, annotation
       when ?v ; dx, dy =  0,  1
@@ -113,16 +113,17 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
         error.call if 1 != t.denominator
         stack.unshift 0 until stack.size > t
         stack[-t-1], stack[-1] = stack[-1], stack[-t-1] unless 0 > t
+      # TODO: annotate prints
       when ?. ; stdout.print "#{_ = pop[]; 1 != _.denominator ? _.to_f : _.to_i} "
       when ?, ; stdout.print "#{_ = pop[]; 1 != _.denominator ? error.call : _ < 0 || _ > 255 ? error.call : _.to_i.chr}"
-      when ?~ ; if _ = stdin.getbyte then stack.push _; move[] end
+      when ?~ ; if _ = stdin.getbyte then stack.push RASELStackItem.new _, annotation; move[] end
       when ?&
         getc = ->{ stdin.getc or throw nil }
         catch nil do
           nil until (?0..?9).include? c = getc[]
           while (?0..?9).include? cc = stdin.getc ; c << cc end
           stdin.ungetbyte cc if cc
-          stack.push c.to_i
+          stack.push RASELStackItem.new c.to_i, annotation
           move[]
         end
       when ?j
