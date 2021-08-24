@@ -6,7 +6,7 @@ class RASELStackItem < DelegateClass Rational
   attr_reader :annotation
   def initialize n, annotation
     super n
-    @annotation = annotation
+    @annotation = annotation || (n.annotation if n.respond_to? :annotation)
   end
 end
 
@@ -112,7 +112,7 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
         t = pop[]
         error.call if 1 != t.denominator
         stack.unshift 0 until stack.size > t
-        stack[-t-1], stack[-1] = stack[-1], stack[-t-1] unless 0 > t
+        stack[-t-1], stack[-1] = RASELStackItem.new(stack[-1], annotation), stack[-t-1] unless 0 > t
       # TODO: annotate prints
       when ?. ; stdout.print "#{_ = pop[]; 1 != _.denominator ? _.to_f : _.to_i} "
       when ?, ; stdout.print "#{_ = pop[]; 1 != _.denominator ? error.call : _ < 0 || _ > 255 ? error.call : _.to_i.chr}"

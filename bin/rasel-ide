@@ -48,7 +48,7 @@ get "/" do
               const [stdout, exitstatus] = data;
               $("#result").empty().
                 append(`<div><b>EXIT CODE:</b> ${exitstatus}</div>`).
-                append("<div><b>LOG:</b></div>");//.append(stdout);
+                append("<div><b>LOG:</b></div>");
               stdout.forEach( function(msg) {
                 const [reason, str] = JSON.parse(msg);
                 const div = $("<div style='display: flex; gap: 0.3rem; align-items: baseline'></div>").appendTo($("#result"));
