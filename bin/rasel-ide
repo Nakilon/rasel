@@ -56,11 +56,14 @@ get "/" do
             } );
             jsend("post", "write", {dump: JSON.stringify(dump)}, ()=>{});
           };
+          window.annotate = function() {
+              window.selected_cell.css("background-color", "#eee")[0].dataset.a = $("input").val();
+          };
           $("input").keyup( function(event) {
             event.stopPropagation();
             if (event.keyCode != 13) return;
             if ($("input").val().length)
-              window.selected_cell.css("background-color", "#eee")[0].dataset.a = $("input").val();
+              annotate();
             else {
               window.selected_cell.css("background-color", "")[0];
               delete window.selected_cell[0].dataset.a;
@@ -84,10 +87,9 @@ get "/" do
               $("input").val(this.dataset.a);
             } );
           };
-          window.add_row_adder = function() {
-            const i = $("#row_adders").children().length;
-            $("<span>+</span>").click( function() {
+          window.add_row = function(i = 0) {
               add_row_adder();
+              add_row_remover();
               const row = $("<span style='display: flex'></span>");
               let w = $("#column_removers").children().length;
               if (i && w)
@@ -95,45 +97,58 @@ get "/" do
               else
                 row.prependTo($("#grid"));
               while (w--) create_span().appendTo(row);
+          };
+          window.add_row_adder = function() {
+            const i = $("#row_adders").children().length;
+            $("<span>+</span>").click( function() {
+              add_row(i);
+              post_code();
             } ).appendTo($("#row_adders"));
-            if (i == 0) return;
+          };
+          window.add_row_remover = function() {
+            const i = $("#row_removers").children().length;
             $("<span>✕</span>").click( function() {
               $("#row_adders>*").last().remove();
               $("#row_removers>*").last().remove();
               let removed = false;
-              $($("#grid").children()[i-1]).children().each( function() {
+              $($("#grid").children()[i]).children().each( function() {
                 if (selected_cell[0] == this) removed = true;
               } );
-              $("#grid").children()[i-1].remove();
+              $("#grid").children()[i].remove();
               if (removed) $("#grid>*:eq(0)>*:eq(0)").click();
               post_code();
             } ).appendTo($("#row_removers"));
-            post_code();
           };
-          window.add_column_adder = function() {
-            const i = $("#column_adders").children().length;
-            $("<span>+</span>").click( function() {
+          window.add_column = function(i = 0) {
               add_column_adder();
+              add_column_remover();
               $("#grid").children().each( function() {
                 if (i && $(this).children().length)
                   create_span().insertAfter($(this).children()[i-1]);
                 else
                   create_span().prependTo($(this));
               } );
+          };
+          window.add_column_adder = function() {
+            const i = $("#column_adders").children().length;
+            $("<span>+</span>").click( function() {
+              add_column(i);
+              post_code();
             } ).appendTo($("#column_adders"));
-            if (i == 0) return;
+          };
+          window.add_column_remover = function() {
+            const i = $("#column_removers").children().length;
             $("<span>✕</span>").click( function() {
               $("#column_adders>*").last().remove();
               $("#column_removers>*").last().remove();
               let removed = false;
               $("#grid").children().each( function() {
-                if (selected_cell[0] == $(this).children()[i-1]) removed = true;
-                $($(this).children()[i-1]).remove();
+                if (selected_cell[0] == $(this).children()[i]) removed = true;
+                $($(this).children()[i]).remove();
               } );
               if (removed) $("#grid>*:eq(0)>*:eq(0)").click();
               post_code();
             } ).appendTo($("#column_removers"));
-            post_code();
           };
           add_row_adder();
           add_column_adder();
@@ -141,10 +156,15 @@ get "/" do
           jsend("get", "read", null, function(data) {
             const code = JSON.parse(data);
             code.forEach( function([y, x, c, a]) {
-              while(y >= $("#row_removers").children().length) $("#row_adders").children().last().click();
-              while(x >= $("#column_removers").children().length) $("#column_adders").children().last().click();
+              while(y >= $("#row_removers").children().length) add_row();
+              while(x >= $("#column_removers").children().length) add_column();
+            } );
+            code.forEach( function([y, x, c, a]) {
               $(`#grid>*:eq(${y})>*:eq(${x})`).text(c).click();
-              if (a) $("input").val(a).trigger($.Event("keyup", {keyCode: 13}));
+              if (a) {
+                $("input").val(a);
+                annotate();
+              };
             } );
             $("#grid>*:eq(0)>*:eq(0)").click();
           } );
