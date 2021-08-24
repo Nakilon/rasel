@@ -1,21 +1,57 @@
 Encoding::default_internal = Encoding::default_external = "ASCII-8BIT"
 END { RubyProf::FlatPrinter.new(RubyProf.stop).print STDERR, min_percent: 1 } if ENV["PROFILE"]
 
-RASELResultStruct = Struct.new(:stdout, :stack, :exitcode)
+class RASELStackItem < DelegateClass Rational
+  attr_reader :annotation
+  def initialize n, annotation
+    super n
+    @annotation = annotation
+  end
+end
+
+RASELResultStruct = Struct.new :stdout, :stack, :exitcode
 def RASEL source, stdout = StringIO.new, stdin = STDIN
-  lines = source.tap{ |_| fail "empty source" if _.empty? }.gsub(/ +$/,"").split(?\n)
-  code = lines.map{ |_| _.ljust(lines.map(&:size).max).bytes }
   stack = []
   pop = ->{ stack.pop || 0 }
+  error = Proc.new{ return RASELResultStruct.new stdout, stack, 255 }
+
+  case source
+  when String
+    lines = source.tap{ |_| raise ArgumentError.new "empty source" if _.empty? }.gsub(/ +$/,"").split(?\n)
+    code = lines.map{ |_| _.ljust(lines.map(&:size).max).bytes }
+  when Array
+    annotate = true
+    code = Array.new(source.map{|y,|y}.max+1){ Array.new(source.map{|_,x,|x}.max+1){ " ".ord } }
+    source.each{ |y, x, c, a| code[y][x] = [c.ord, a] }
+    stdout.instance_eval do
+      pos = self.pos
+      old_puts = method :puts
+      prev = nil
+      define_singleton_method :puts do |str, reason|
+        next if prev == dump = JSON.dump([reason, str])
+        old_puts.call prev = dump
+        if 10_000_000 < stdout.pos - pos
+          old_puts.call JSON.dump [:exit, "printed size"]
+          error.call
+        end
+      end
+      define_singleton_method :print do |str|
+        puts str, :print
+      end
+    end
+  else
+    raise ArgumentError.new "unsupported source class: #{source.class}"
+  end
   dx, dy = 1, 0
   x, y = -1, 0
 
+  # debugging and profiling
   history = {}
   debug_history = ENV.key? "DEBUG_HISTORY"
   move = lambda do
     y = (y + dy) % code.size
     x = (x + dx) % code[y].size
-    next unless debug_history && code[y][x] == 32
+    next unless debug_history && (code[y][x] == 32 || code[y][x][0] == 32)
     history[[x, y]] ||= 0
     history[[x, y]] += 1
   end
@@ -36,11 +72,16 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
 
   reverse = ->{ dy, dx = -dy, -dx }
   stringmode = false
-  error = Proc.new{ return Struct.new(:stdout, :stack, :exitcode).new stdout, stack, 255 }
   debug = ENV.key? "DEBUG"
   loop do
+    if 1 < Time.now - time
+      stdout.puts "time", :exit
+      error.call
+    end
+    stdout.puts stack.map{ |_| _.respond_to?(:annotation) && _.annotation ? [_, _.annotation] : _ }, :loop if annotate
+
     move[]
-    byte = code[y][x]
+    byte, annotation = code[y][x]
     char = byte.chr
     STDERR.puts [char, stringmode, (stack.last Integer ENV["DEBUG"] rescue stack)].inspect if debug
 
@@ -57,10 +98,10 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
       when ?" ; stringmode ^= true
       when ?# ; move[]
       when ?$ ; pop[]
-      when ?: ; stack.concat [pop[]] * 2
+      when ?: ; popped = pop[]; stack.push popped; stack.push RASELStackItem.new popped, annotation
       when ?- ; stack.push -(pop[] - pop[])
-      when ?/ ; b, a = pop[], pop[]; stack.push (b.zero? ? 0 : Rational(a) / b)
-      when ?% ; b, a = pop[], pop[]; stack.push (b.zero? ? 0 : Rational(a) % b)
+      when ?/ ; b, a = pop[], pop[]; stack.push RASELStackItem.new b.zero? ? 0 : Rational(a) / b, annotation
+      when ?% ; b, a = pop[], pop[]; stack.push RASELStackItem.new b.zero? ? 0 : Rational(a) % b, annotation
       when ?v ; dx, dy =  0,  1
       when ?> ; dx, dy =  1,  0
       when ?^ ; dx, dy =  0, -1
@@ -68,11 +109,11 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
       when ?? ; move[] if pop[] > 0
       when ?\\
         t = pop[]
-        error[] if 1 != t.denominator
+        error.call if 1 != t.denominator
         stack.unshift 0 until stack.size > t
         stack[-t-1], stack[-1] = stack[-1], stack[-t-1] unless 0 > t
       when ?. ; stdout.print "#{_ = pop[]; 1 != _.denominator ? _.to_f : _.to_i} "
-      when ?, ; stdout.print "#{_ = pop[]; 1 != _.denominator ? error[] : _ < 0 || _ > 255 ? error[] : _.to_i.chr}"
+      when ?, ; stdout.print "#{_ = pop[]; 1 != _.denominator ? error.call : _ < 0 || _ > 255 ? error.call : _.to_i.chr}"
       when ?~ ; if _ = stdin.getbyte then stack.push _; move[] end
       when ?&
         getc = ->{ stdin.getc or throw nil }
@@ -85,11 +126,11 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
         end
       when ?j
         t = pop[]
-        error[] if 1 != t.denominator
+        error.call if 1 != t.denominator
         y = (y + dy * t.to_i) % code.size
         x = (x + dx * t.to_i) % code[y].size
 
-      else ; error[]
+      else ; error.call
     end
   end
 end

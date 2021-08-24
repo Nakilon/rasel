@@ -2,4 +2,6 @@
 /pkg
 .DS_Store
 temp*
+
+# kludge for sinatra/reloader
 /bin/rasel-ide.rb

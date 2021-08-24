@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+Signal.trap(:INT){ abort "\n(interrupted by SIGINT)" }
+
+require_relative "../lib/rasel"
+require "json"
+exit RASEL(JSON.load(ARGF.read), STDOUT).exitcode

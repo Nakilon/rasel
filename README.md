@@ -37,16 +37,6 @@ Or pipe it too:
 echo 5 | rasel examples/factorial.rasel
 echo 5 | rasel examples/fibonacci.rasel
 ```
-Environment variable `DEBUG` makes it print the current instruction, stack and stringmode like this:
-```none
-["&", false, []]
-[":", false, [10]]
-["?", false, [10, 10]]
-["1", false, [10]]
-["-", false, [10, 1]]
-[":", false, [9]]
-...
-```
 
 ## Reference specification
 
@@ -197,3 +187,17 @@ Initial version of RASEL was v0. The v1 introduced the "swapn" and deprecated th
 ## Development notes
 
 When using jruby you should set env var `CI` to bundle and run tests avoiding the `gem ruby-prof` installation failure.
+
+### Debugging and profiling env vars (currently not tested/maintained)
+
+Environment variable `DEBUG` makes it print the current instruction, stack and stringmode like this:
+```none
+["&", false, []]
+[":", false, [10]]
+["?", false, [10, 10]]
+["1", false, [10]]
+["-", false, [10, 1]]
+[":", false, [9]]
+...
+```
+Also `DEBUG_HISTORY` and `PROFILE` to profile RASEL and Ruby code respectively.

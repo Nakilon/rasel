@@ -5,6 +5,7 @@ abort_usage = lambda do
     usage:
     \t$ #{__FILE__} <file.rasel> <file.rasela>
     \t$ #{__FILE__} <file.rasela> <file.rasel>
+    \t(pipe support is not implemented)
   HEREDOC
 end
 abort_usage.call unless ARGV[0] and File.file? ARGV[0]

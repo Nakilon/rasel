@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name         = "rasel"
-  spec.version      = "1.0.1"
+  spec.version      = "1.1.0"
   spec.summary      = "Random Access Stack Esoteric Language"
 
   spec.author       = "Victor Maslov aka Nakilon"
@@ -12,8 +12,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest-around"
   spec.add_development_dependency "ruby-prof" unless ENV["CI"]
 
+  spec.files        = %w{ LICENSE rasel.gemspec lib/rasel.rb
+                          bin/rasel bin/rasel-annotated bin/rasel-convert bin/rasel-ide }
+  spec.executables  = %w{     rasel     rasel-annotated     rasel-convert     rasel-ide }
   spec.bindir       = "bin"
-  spec.executable   = "rasel"
-  spec.test_file    = "test.rb"
-  spec.files        = %w{ LICENSE rasel.gemspec lib/rasel.rb bin/rasel bin/rasel-ide }
 end
