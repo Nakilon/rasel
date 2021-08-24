@@ -8,7 +8,7 @@ abort_usage = lambda do
   HEREDOC
 end
 abort_usage.call unless ARGV[0] and File.file? ARGV[0]
-abort_usage.call unless ARGV[0] and ARGV[1] and File.file?(ARGV[1]) || !File.exist?(ARGV[1])
+abort_usage.call unless ARGV[0] and ARGV[1] and (!File.exist?(ARGV[1]) || puts("overwriting")) || File.file?(ARGV[1])
 
 require "json"
 case ARGV.map &File.method(:extname)
@@ -20,7 +20,12 @@ when %w{ .rasel .rasela }
       flat_map.with_index{ |row, i| row.chars.map.with_index{ |c, j| [i, j, c] } }
   )
 when %w{ .rasela .rasel }
-  puts "converting B"
+  File.open ARGV[1], "w" do |file|
+    file.puts( JSON.load(File.read ARGV[0]).each_with_object([]) do |(y, x, c, a), code|
+      code[y] ||= ""
+      code[y][x] = c
+    end )
+  end
 else
   abort_usage.call
 end
