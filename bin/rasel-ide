@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-abort "usage:\t#{__FILE__} <file.rasela>" unless 1 == ARGV.size
+abort "usage:\trasel-ide <file.rasela>" unless 1 == ARGV.size
 abort "invalid directory" unless File.directory? File.dirname File.expand_path ARGV.first
 require "json"
 File.write ARGV.first, JSON.pretty_generate([[0,0,"@"]]) unless File.exist? ARGV.first

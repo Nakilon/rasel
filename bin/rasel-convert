@@ -3,8 +3,8 @@
 abort_usage = lambda do
   abort <<~HEREDOC
     usage:
-    \t$ #{__FILE__} <file.rasel> <file.rasela>
-    \t$ #{__FILE__} <file.rasela> <file.rasel>
+    \t$ rasel-convert <file.rasel> <file.rasela>
+    \t$ rasel-convert <file.rasela> <file.rasel>
     \t(pipe support is not implemented)
   HEREDOC
 end
