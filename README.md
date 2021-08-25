@@ -1,14 +1,14 @@
-# RASEL (Random Access Stack Esoteric Language) v1
+# RASEL (Random Access Stack Esoteric Language)
 
-A programming language inspired by Befunge where instead of the program space random access you have the ability to swap with the Nth value in stack.
+A programming language inspired by Befunge where instead of the program space random access you have the ability to swap with the Nth value in the stack.
 
-This repository includes [specification](#reference-specification), [examples](examples), [executables](bin) and [library](lib/rasel.rb), its [tests](test.rb) running as [GitHub Action](.github/workflows/test.yaml).
+This repository includes [specification](#reference-specification), [examples](examples), [executables](bin) and [library](lib/rasel.rb), its [tests](test.rb) running as [GitHub Action](.github/workflows/test.yaml). There is also an IDE -- read more about it in the [RASEL](https://esolangs.org/wiki/RASEL) article at Esolang Wiki.
 
 ## Usage
 
 ### Install
 
-```
+```bash
 gem install rasel
 ```
 
@@ -16,12 +16,12 @@ gem install rasel
 
 To run a program you can either use the executable and pass a source file as argument:
 ```bash
-echo '"olleh",,,,,A,@' > temp.rasel
-rasel temp.rasel
+$ echo '"olleh",,,,,A,@' > temp.rasel
+$ rasel temp.rasel
 ```
 Or pipe the source code directly:
 ```bash
-echo '"olleh",,,,,A,@' | rasel
+$ echo '"olleh",,,,,A,@' | rasel
 ```
 Or pass it as a String arg in Ruby runtime:
 ```ruby
@@ -30,12 +30,12 @@ puts RASEL('"olleh",,,,,@').stdout.string
 ```
 To run a program and feed it some stdin you can either put it to a file:
 ```bash
-rasel my_program.rasel < my_input.txt
+$ rasel my_program.rasel < my_input.txt
 ```
 Or pipe it too:
 ```bash
-echo 5 | rasel examples/factorial.rasel
-echo 5 | rasel examples/fibonacci.rasel
+$ echo 5 | rasel examples/factorial.rasel
+$ echo 5 | rasel examples/fibonacci.rasel
 ```
 
 ## Reference specification
@@ -103,15 +103,15 @@ echo 5 | rasel examples/fibonacci.rasel
 ### Factorial ([OEIS A000142](https://oeis.org/A000142))
 
 ```
-1&$:?v:1-3\$/1\
-     >$11\/.A,@
+1&\:?v:1-3\$/
+1\/.@>$1
 ```
 
 ### Fibonacci ([OEIS A000045](https://oeis.org/A000045))
 
 ```
-1&-:?v2\:2\01\--2\
-     >$.A,@
+1&-:?v1\:3\01\--1\
+2\.@ >
 ```
 
 ### Project Euler's [Problem 1 "Multiples of 3 and 5"](https://projecteuler.net/problem=1)
@@ -124,10 +124,9 @@ echo 5 | rasel examples/fibonacci.rasel
 ### Prime numbers generator
 
 ```
-2v
- >:4v     >1\1-\2-1\:.1\\$ 01--
-    >::\:?^:3\1\%?v2-\1\:2\01--
- ^                >2-\$    01--
+2:4v     >$       2-\$:.> 01--#
+   >::\:?^:3\1\%?v2-\1\:2\01--
+                 >2-\$  v
 ```
 ```none
 $ rasel examples/prime.rasel
@@ -152,9 +151,26 @@ RASEL:
 ```
 Here you can see that it's about the same size.
 
-## Breaking change note
+## IDE and other executables
 
-Initial version of RASEL was v0. The v1 introduced the "swapn" and deprecated the "take at".
+The "RASEL IDE" is for editing the `.rasela` "annotated" code. It is fully explained in the Esolang Wiki article.
+* `bin/rasel-convert`  
+  ```none
+  $ rasel-convert 
+  usage:
+          $ rasel-convert <file.rasel> <file.rasela>
+          $ rasel-convert <file.rasela> <file.rasel>
+  ```
+  The `.rasela` file format is JSON.
+* `bin/rasel-annotated`  
+  Use it to run `.rasela`. Currently it has some hardcoded time and stdout print size limits because you don't want to wait forever when launching via the IDE.
+* `bin/rasel-ide`  
+  ```none
+  $ rasel-ide
+  usage:	rasel-ide <file.rasela>
+  ```
+  CSS and JS improvements ideas and help are welcome.
+  ![IDE example screenshot](https://user-images.githubusercontent.com/2870363/130821475-76d2d12b-237c-4cfb-a21f-b85107c2c3ca.png)
 
 ## TODO
 
@@ -165,7 +181,16 @@ Initial version of RASEL was v0. The v1 introduced the "swapn" and deprecated th
 - [x] minimal instruction set enough for random write
 - [x] implementation, tests and docs
   - [x] non-instructional
-  - [x] executable
+  - [x] main executable
+  - [ ] IDE improvements
+    - [ ] tests for it and other executables
+    - [ ] colorful annotations?
+    - [ ] scrollable div for log
+    - [ ] highlight the cell on log mouse hover
+    - [ ] easier clearing the cell
+    - [ ] annotate empty cell to annotate top?
+    - [ ] configurable print size and time limits?
+    - [ ] "less pretty" .rasela for compactness.
   - [x] instructional
     - [x] old
       - [x] `"`, `#`
