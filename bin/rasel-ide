@@ -51,10 +51,13 @@ get "/" do
                 append("<div><b>LOG:</b></div>");
               stdout.forEach( function(msg) {
                 const [reason, str] = JSON.parse(msg);
-                const div = $("<div style='display: flex; gap: 0.3rem; align-items: baseline'></div>").appendTo($("#result"));
+                const div = $("<div style='display: flex; gap: 0.3rem; align-items: baseline'></div>");
                 switch (reason) {
                   case "print":
                     div.text("print:").append(`<span>${str}</span>`);
+                    break;
+                  case "abort":
+                    div.text("aborted:").append(`<span>${str}</span>`);
                     break;
                   case "loop":
                     div.text("stack:");
@@ -72,6 +75,7 @@ get "/" do
                   default:
                     div.text("unknown msg type:").append(`<span>${reason}</span>`);
                 };
+                div.appendTo($("#result"));
               } );
             } );
           } );

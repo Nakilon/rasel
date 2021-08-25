@@ -31,8 +31,8 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
       define_singleton_method :puts do |str, reason|
         next if prev == dump = JSON.dump([reason, str])
         old_puts.call prev = dump
-        if 1_000_000 < stdout.pos - pos
-          old_puts.call JSON.dump [:exit, "printed size"]
+        if 200_000 < stdout.pos - pos
+          old_puts.call JSON.dump [:abort, "printed size"]
           error.call
         end
       end
@@ -75,8 +75,8 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
   stringmode = false
   debug = ENV.key? "DEBUG"
   loop do
-    if 1 < Time.now - time
-      stdout.puts "time", :exit
+    if annotate && 1 < Time.now - time
+      stdout.puts "timeout", :abort
       error.call
     end
     stdout.puts stack.map{ |_| _.respond_to?(:annotation) && _.annotation ? [_, _.annotation] : _ }, :loop if annotate

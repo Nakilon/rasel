@@ -2,7 +2,7 @@
 
 A programming language inspired by Befunge where instead of the program space random access you have the ability to swap with the Nth value in stack.
 
-This repository includes [specification](#reference-specification), [examples](examples), [executable](bin/rasel) and [library](lib/rasel.rb), its [tests](test.rb) and [Github Action](.github/workflows/test.yaml) that runs them automatically.
+This repository includes [specification](#reference-specification), [examples](examples), [executables](bin) and [library](lib/rasel.rb), its [tests](test.rb) running as [GitHub Action](.github/workflows/test.yaml).
 
 ## Usage
 
