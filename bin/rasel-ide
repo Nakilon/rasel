@@ -7,6 +7,7 @@ File.write ARGV.first, JSON.pretty_generate([[0,0,"@"]]) unless File.exist? ARGV
 abort "the argument should be a file" unless File.file? ARGV.first if File.exist? ARGV.first
 
 require "sinatra"
+enable :run
 # require "sinatra/reloader"  # uncomment only during the development
 get "/jquery.js" do
   send_file "#{__dir__}/../jquery-3.6.0.min.js"
@@ -263,6 +264,7 @@ require_relative "../lib/rasel"
 require "open3"
 post "/run" do
   begin
+    require "timeout"
     result = Timeout.timeout(2) do
       RASEL \
         JSON.load(File.read ARGV.first),
