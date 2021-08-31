@@ -10,7 +10,7 @@ require "sinatra"
 enable :run
 # require "sinatra/reloader"  # uncomment only during the development
 get "/jquery.js" do
-  send_file "#{__dir__}/../jquery-3.6.0.min.js"
+  send_file "#{__dir__}/jquery-3.6.0.min.js"
 end
 
 get "/" do
