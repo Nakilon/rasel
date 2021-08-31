@@ -183,14 +183,14 @@ The "RASEL IDE" is for editing the `.rasela` "annotated" code. It is fully expla
   - [x] non-instructional
   - [x] main executable
   - [ ] IDE improvements
-    - [ ] tests for it and other executables
+    - [ ] tests it and other executables
+    - [x] more compact JSON export
     - [ ] colorful annotations?
     - [ ] scrollable div for log
     - [ ] highlight the cell on log mouse hover
     - [ ] easier clearing the cell
     - [ ] annotate empty cell to annotate top?
     - [ ] configurable print size and time limits?
-    - [ ] "less pretty" .rasela for compactness.
   - [x] instructional
     - [x] old
       - [x] `"`, `#`

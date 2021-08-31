@@ -14,11 +14,14 @@ abort_usage.call unless ARGV[0] and ARGV[1] and (!File.exist?(ARGV[1]) || puts("
 require "json"
 case ARGV.map &File.method(:extname)
 when %w{ .rasel .rasela }
-  File.write ARGV[1], JSON.pretty_generate(
-    File.read(ARGV[0]).
-      tap{ |_| abort "empty source" if _.empty? }.
-      gsub(/ +$/,"").split(?\n).
-      flat_map.with_index{ |row, i| row.chars.map.with_index{ |c, j| [i, j, c] } }
+  require_relative "../lib/rasel"
+  RASEL.write_pretty_json ARGV[1], (
+    File.read(ARGV[0]).tap{ |_| abort "empty source" if _.empty? }.
+      split("\n").each_with_index.with_object([]) do |(row, i), o|
+        row.chars.each_with_index do |c, j|
+          o.push [i, j, c] unless " " == c
+        end
+      end
   )
 when %w{ .rasela .rasel }
   File.open ARGV[1], "w" do |file|

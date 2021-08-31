@@ -1,20 +1,29 @@
 Encoding::default_internal = Encoding::default_external = "ASCII-8BIT"
 END { RubyProf::FlatPrinter.new(RubyProf.stop).print STDERR, min_percent: 1 } if ENV["PROFILE"]
 
-require "delegate"
-class RASELStackItem < DelegateClass Rational
-  attr_reader :annotation
-  def initialize n, annotation
-    super n
-    @annotation = annotation || (n.annotation if n.respond_to? :annotation)
+module RASEL
+  require "delegate"
+  class StackItem < DelegateClass Rational
+    attr_reader :annotation
+    def initialize n, annotation
+      super n
+      @annotation = annotation || (n.annotation if n.respond_to? :annotation)
+    end
+  end
+
+  ResultStruct = Struct.new :stdout, :stack, :exitcode
+
+  def self.write_pretty_json where, what
+    File.write where, "[\n  " + (
+      what.map(&JSON.method(:dump)).join ",\n  "
+    ) + "\n]\n"
   end
 end
 
-RASELResultStruct = Struct.new :stdout, :stack, :exitcode
 def RASEL source, stdout = StringIO.new, stdin = STDIN
   stack = []
   pop = ->{ stack.pop || 0 }
-  error = Proc.new{ return RASELResultStruct.new stdout, stack, 255 }
+  error = Proc.new{ return RASEL::ResultStruct.new stdout, stack, 255 }
 
   case source
   when String
@@ -87,22 +96,22 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
     STDERR.puts [char, stringmode, (stack.last Integer ENV["DEBUG"] rescue stack)].inspect if debug
 
     next stack.push byte if stringmode && char != ?"
-    return RASELResultStruct.new stdout, stack, (
+    return RASEL::ResultStruct.new stdout, stack, (
       t = pop[]
       1 != t.denominator || t < 0 || t > 255 ? 255 : t.to_i
     ) if char == ?@
     case char
       when ?\s
 
-      when ?0..?9 ; stack.push RASELStackItem.new byte - 48, annotation
-      when ?A..?Z ; stack.push RASELStackItem.new byte - 55, annotation
+      when ?0..?9 ; stack.push RASEL::StackItem.new byte - 48, annotation
+      when ?A..?Z ; stack.push RASEL::StackItem.new byte - 55, annotation
       when ?" ; stringmode ^= true
       when ?# ; move[]
       when ?$ ; pop[]
-      when ?: ; popped = pop[]; stack.push popped; stack.push RASELStackItem.new popped, annotation
-      when ?- ; stack.push RASELStackItem.new -(pop[] - pop[]), annotation
-      when ?/ ; b, a = pop[], pop[]; stack.push RASELStackItem.new b.zero? ? 0 : Rational(a) / b, annotation
-      when ?% ; b, a = pop[], pop[]; stack.push RASELStackItem.new b.zero? ? 0 : Rational(a) % b, annotation
+      when ?: ; popped = pop[]; stack.push popped; stack.push RASEL::StackItem.new popped, annotation
+      when ?- ; stack.push RASEL::StackItem.new -(pop[] - pop[]), annotation
+      when ?/ ; b, a = pop[], pop[]; stack.push RASEL::StackItem.new b.zero? ? 0 : Rational(a) / b, annotation
+      when ?% ; b, a = pop[], pop[]; stack.push RASEL::StackItem.new b.zero? ? 0 : Rational(a) % b, annotation
       when ?v ; dx, dy =  0,  1
       when ?> ; dx, dy =  1,  0
       when ?^ ; dx, dy =  0, -1
@@ -112,18 +121,18 @@ def RASEL source, stdout = StringIO.new, stdin = STDIN
         t = pop[]
         error.call if 1 != t.denominator
         stack.unshift 0 until stack.size > t
-        stack[-t-1], stack[-1] = RASELStackItem.new(stack[-1], annotation), stack[-t-1] unless 0 > t
+        stack[-t-1], stack[-1] = RASEL::StackItem.new(stack[-1], annotation), stack[-t-1] unless 0 > t
       # TODO: annotate prints
       when ?. ; stdout.print "#{_ = pop[]; 1 != _.denominator ? _.to_f : _.to_i} "
       when ?, ; stdout.print "#{_ = pop[]; 1 != _.denominator ? error.call : _ < 0 || _ > 255 ? error.call : _.to_i.chr}"
-      when ?~ ; if _ = stdin.getbyte then stack.push RASELStackItem.new _, annotation; move[] end
+      when ?~ ; if _ = stdin.getbyte then stack.push RASEL::StackItem.new _, annotation; move[] end
       when ?&
         getc = ->{ stdin.getc or throw nil }
         catch nil do
           nil until (?0..?9).include? c = getc[]
           while (?0..?9).include? cc = stdin.getc ; c << cc end
           stdin.ungetbyte cc if cc
-          stack.push RASELStackItem.new c.to_i, annotation
+          stack.push RASEL::StackItem.new c.to_i, annotation
           move[]
         end
       when ?j
