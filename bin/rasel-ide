@@ -266,7 +266,7 @@ post "/run" do
   begin
     require "timeout"
     result = Timeout.timeout(2) do
-      RASEL \
+      RASEL::run_annotated \
         JSON.load(File.read ARGV.first),
         StringIO.new,
         StringIO.new.tap{ |_| JSON.load(params.fetch "stdin").bytes.reverse_each &_.method(:ungetbyte) }

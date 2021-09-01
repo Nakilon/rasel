@@ -110,10 +110,10 @@ module RASEL
   def self.run_annotated source, stdout = StringIO.new, stdin = STDIN
     stack = []
     pop = ->{ stack.pop || 0 }
-    error = Proc.new{ return RASEL::ResultStruct.new stdout, stack, 255 }
+    error = Proc.new{ return ResultStruct.new stdout, stack, 255 }
 
     code = Array.new(source.map{|y,|y}.max+1){ Array.new(source.map{|_,x,|x}.max+1){ " ".ord } }
-    source.each{ |y, x, c, a| code[y][x] = [c.ord, a] }
+    source.each{ |y, x, c, a| code[y][x] = [c.ord, a] unless c.empty? }
     stdout.instance_eval do
       pos = self.pos
       old_puts = method :puts
@@ -153,23 +153,23 @@ module RASEL
       byte, annotation = code[y][x]
       char = byte.chr
 
-      next stack.push byte if stringmode && char != ?"
-      return RASEL::ResultStruct.new stdout, stack, (
+      next stack.push StackItem.new byte, annotation if stringmode && char != ?"
+      return ResultStruct.new stdout, stack, (
         t = pop[]
         1 != t.denominator || t < 0 || t > 255 ? 255 : t.to_i
       ) if char == ?@
       case char
         when ?\s
 
-        when ?0..?9 ; stack.push RASEL::StackItem.new byte - 48, annotation
-        when ?A..?Z ; stack.push RASEL::StackItem.new byte - 55, annotation
+        when ?0..?9 ; stack.push StackItem.new byte - 48, annotation
+        when ?A..?Z ; stack.push StackItem.new byte - 55, annotation
         when ?" ; stringmode ^= true
         when ?# ; move[]
         when ?$ ; pop[]
-        when ?: ; popped = pop[]; stack.push popped; stack.push RASEL::StackItem.new popped, annotation
-        when ?- ; stack.push RASEL::StackItem.new -(pop[] - pop[]), annotation
-        when ?/ ; b, a = pop[], pop[]; stack.push RASEL::StackItem.new b.zero? ? 0 : Rational(a) / b, annotation
-        when ?% ; b, a = pop[], pop[]; stack.push RASEL::StackItem.new b.zero? ? 0 : Rational(a) % b, annotation
+        when ?: ; popped = pop[]; stack.push popped; stack.push StackItem.new popped, annotation
+        when ?- ; stack.push StackItem.new -(pop[] - pop[]), annotation
+        when ?/ ; b, a = pop[], pop[]; stack.push StackItem.new b.zero? ? 0 : Rational(a) / b, annotation
+        when ?% ; b, a = pop[], pop[]; stack.push StackItem.new b.zero? ? 0 : Rational(a) % b, annotation
         when ?v ; dx, dy =  0,  1
         when ?> ; dx, dy =  1,  0
         when ?^ ; dx, dy =  0, -1
@@ -179,18 +179,18 @@ module RASEL
           t = pop[]
           error.call if 1 != t.denominator
           stack.unshift 0 until stack.size > t
-          stack[-t-1], stack[-1] = RASEL::StackItem.new(stack[-1], annotation), stack[-t-1] unless 0 > t
+          stack[-t-1], stack[-1] = StackItem.new(stack[-1], annotation), stack[-t-1] unless 0 > t
         # TODO: annotate prints
         when ?. ; stdout.print "#{_ = pop[]; 1 != _.denominator ? _.to_f : _.to_i} "
         when ?, ; stdout.print "#{_ = pop[]; 1 != _.denominator ? error.call : _ < 0 || _ > 255 ? error.call : _.to_i.chr}"
-        when ?~ ; if _ = stdin.getbyte then stack.push RASEL::StackItem.new _, annotation; move[] end
+        when ?~ ; if _ = stdin.getbyte then stack.push StackItem.new _, annotation; move[] end
         when ?&
           getc = ->{ stdin.getc or throw nil }
           catch nil do
             nil until (?0..?9).include? c = getc[]
             while (?0..?9).include? cc = stdin.getc ; c << cc end
             stdin.ungetbyte cc if cc
-            stack.push RASEL::StackItem.new c.to_i, annotation
+            stack.push StackItem.new c.to_i, annotation
             move[]
           end
         when ?j
