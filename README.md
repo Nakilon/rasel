@@ -2,7 +2,7 @@
 
 A programming language inspired by Befunge where instead of the program space random access you have the ability to swap with the Nth value in the stack.
 
-This repository includes [specification](#reference-specification), [examples](examples), [executables](bin) and [library](lib/rasel.rb), its [tests](test.rb) running as [GitHub Action](.github/workflows/test.yaml). There is also an IDE -- read more about it in the [RASEL](https://esolangs.org/wiki/RASEL) article at Esolang Wiki.
+This repository includes [specification](#reference-specification), [examples](examples), [executables](bin) and [library](lib/rasel.rb), its [tests](test.rb) running as [GitHub Action](.github/workflows/test.yaml). There is also an IDE -- read more about it in the Esolang Wiki [RASEL](https://esolangs.org/wiki/RASEL) language article.
 
 ## Usage
 
@@ -182,6 +182,7 @@ The "RASEL IDE" is for editing the `.rasela` "annotated" code. It is fully expla
 - [x] implementation, tests and docs
   - [x] non-instructional
   - [x] main executable
+  - [ ] add truffleruby (three tests are failing)
   - [ ] IDE improvements
     - [ ] tests it and other executables
     - [x] more compact JSON export

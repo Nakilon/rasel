@@ -7,8 +7,9 @@ require_relative "lib/rasel"
 # TODO: assert that all RASEL() return with 0 exit code unless the opposite is expected
 
 describe "bin" do
-  around{ |test| Timeout.timeout(RUBY_PLATFORM == "java" ? 4 : 1){ test.call } }
-  describe "executable" do
+
+  describe "rasel" do
+    around{ |test| Timeout.timeout(RUBY_PLATFORM == "java" ? 4 : 1){ test.call } }
     require "open3"
     [
       ["cat.rasel < examples/cat.rasel", 0, File.read("examples/cat.rasel")],
@@ -25,6 +26,36 @@ describe "bin" do
       end
     end
   end
+
+  describe "rasel" do
+    around{ |test| Timeout.timeout(1){ test.call } }
+    it "rasel-annotated" do
+      # can't implemented this test using Open3 because of a weird Ruby bug: Illegal seek @ rb_io_tell
+      stdout = Tempfile.new "rasel-test-stdout"
+      stderr = Tempfile.new "rasel-test-stderr"
+      begin
+        system "./bin/rasel-annotated examples/cat.rasela 1>#{stdout.path} 2>#{stderr.path} <<<12"
+        assert_equal [0, <<~HEREDOC, ""], [$?.exitstatus, stdout.read, stderr.read]
+          ["loop",[]]
+          ["loop",[[49,"..)"]]]
+          ["print","1"]
+          ["loop",[]]
+          ["loop",[[50,"..)"]]]
+          ["print","2"]
+          ["loop",[]]
+          ["loop",[[10,"..)"]]]
+          ["print","\\n"]
+          ["loop",[]]
+        HEREDOC
+      ensure
+        stdout.close
+        stdout.unlink
+        stderr.close
+        stderr.unlink
+      end
+    end
+  end
+
 end
 
 describe "lib" do
