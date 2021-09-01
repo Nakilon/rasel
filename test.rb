@@ -34,7 +34,7 @@ describe "bin" do
       stdout = Tempfile.new "rasel-test-stdout"
       stderr = Tempfile.new "rasel-test-stderr"
       begin
-        system "./bin/rasel-annotated examples/cat.rasela 1>#{stdout.path} 2>#{stderr.path} <<<12"
+        system "echo 12 | ./bin/rasel-annotated examples/cat.rasela 1>#{stdout.path} 2>#{stderr.path}"
         assert_equal [0, <<~HEREDOC, ""], [$?.exitstatus, stdout.read, stderr.read]
           ["loop",[]]
           ["loop",[[49,"..)"]]]
