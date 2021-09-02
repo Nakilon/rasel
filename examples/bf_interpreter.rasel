@@ -38,7 +38,10 @@
            >"dmc dab",,,,,,,A,1@
 
 * converted from .rasela, debug prints (:,) removed
-* bf code ends with eof or ' ', the rest is stdin
-* read from eof exits with code 1
-* going to the negative tape address exits with code 1
-* instruction other than [],.<>-+ exists with code 1
+* stdin is splitted into bf code and bf stdin delimeted by EOF or ' '
+* exit codes (only 0 and 1 are possible)
+  * exit code 1 also prints the error message
+  * all possible cases of exit code 1
+    * read from EOF
+    * going to the negative tape address
+    * reaching an instruction other than [],.<>-+
