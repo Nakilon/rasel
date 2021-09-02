@@ -1,5 +1,4 @@
 Encoding::default_internal = Encoding::default_external = "ASCII-8BIT"
-END { RubyProf::FlatPrinter.new(RubyProf.stop).print STDERR, min_percent: 1 } if ENV["PROFILE"]
 
 module RASEL
   ResultStruct = Struct.new :stdout, :stack, :exitcode
@@ -35,10 +34,6 @@ module RASEL
         sleep 0.1
       end
     end if debug_history
-    if ENV["PROFILE"]
-      require "ruby-prof"
-      RubyProf.start
-    end
 
     reverse = ->{ dy, dx = -dy, -dx }
     stringmode = false

@@ -207,6 +207,7 @@ The "RASEL IDE" is for editing the `.rasela` "annotated" code. It is fully expla
     - [ ] bin/rasel-convert
     - [ ] bin/rasel-ide?
   - [ ] add truffleruby (use https://github.com/graalvm/container/pkgs/container/truffleruby)
+  - [ ] add jruby?
 - [ ] IDE improvements
   - [x] more compact JSON export
   - [ ] scrollable div for log
@@ -223,7 +224,5 @@ The "RASEL IDE" is for editing the `.rasela` "annotated" code. It is fully expla
   - [ ] configurable print size and time limits?
 
 ## Development notes
-
-When using jruby you should set env var `CI` to bundle and run tests avoiding the `gem ruby-prof` installation failure.
 
 TODO: add a tutorial how to debug with `rasel-annotated`
