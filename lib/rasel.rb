@@ -121,7 +121,7 @@ module RASEL
       define_singleton_method :puts do |str, reason|
         next if prev == dump = JSON.dump([reason, str])
         old_puts.call prev = dump
-        if 200_000 < stdout.pos - pos
+        if 500_000 < stdout.pos - pos
           old_puts.call JSON.dump [:abort, "printed size"]
           error.call
         end

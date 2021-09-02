@@ -192,6 +192,8 @@ The "RASEL IDE" is for editing the `.rasela` "annotated" code. It is fully expla
     - [ ] navigate with keyboard arrows
     - [ ] add/remove cell in one row
     - [ ] copy/paste rows
+    - [ ] show accumulated prints
+    - [ ] \ should annotate right one, not left one?
     - [ ] undo(/redo?)
     - [ ] colorful annotations?
     - [ ] annotate empty cell to annotate top?
