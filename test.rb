@@ -212,3 +212,19 @@ describe "other" do
     end
   end
 end
+
+describe "brainfuck" do
+  around{ |test| Timeout.timeout(1){ test.call } }
+  [
+    [",.", ".,,..,. 1234", "\x00223end\n", 0],
+    ["[", "[<+]++.<", "\x02tape end\n", 1],
+    ["[[", "[[<,],],.< 1", "1tape end\n", 1],
+    ["]", "++[>,.<-],. 1234", "123end\n", 0],
+    ["]]", "++[.>[]<-]", "\x02\x01end\n", 0],
+  ].each do |name, input, expected_output, expected_status|
+    it name do
+      string, status = Open3.capture2e "printf \"#{input}\" | ./bin/rasel examples/bf_interpreter.rasel"
+      assert_equal [expected_status, expected_output], [status.exitstatus, string]
+    end
+  end
+end
