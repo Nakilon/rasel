@@ -179,25 +179,8 @@ The "RASEL IDE" is for editing the `.rasela` "annotated" code. It is fully expla
 - [x] [page at esolangs.org](https://esolangs.org/wiki/rasel)
 - [x] [announce](https://www.reddit.com/r/esolangs/comments/lsjmrq/rasel_random_access_stack_esoteric_language/)
 - [x] minimal instruction set enough for random write
-- [x] implementation, tests and docs
+- [x] specification implementation, tests and docs
   - [x] non-instructional
-  - [x] main executable
-  - [ ] add truffleruby (three tests are failing)
-  - [ ] IDE improvements
-    - [ ] test it and other executables
-    - [x] more compact JSON export
-    - [ ] scrollable div for log
-    - [ ] highlight the cell on log mouse hover
-    - [ ] easier clearing the cell
-    - [ ] navigate with keyboard arrows
-    - [ ] add/remove cell in one row
-    - [ ] copy/paste rows
-    - [ ] show accumulated prints
-    - [ ] \ should annotate right one, not left one?
-    - [ ] undo(/redo?)
-    - [ ] colorful annotations?
-    - [ ] annotate empty cell to annotate top?
-    - [ ] configurable print size and time limits?
   - [x] instructional
     - [x] old
       - [x] `"`, `#`
@@ -214,22 +197,33 @@ The "RASEL IDE" is for editing the `.rasela` "annotated" code. It is fully expla
     - [x] new
       - [x] `A`..`Z`
       - [x] `j`
-      - [ ] TODO: maybe something about additional stacks
+      - [ ] something about additional stacks?
+- [ ] other tests
+  - [ ] bin
+    - [x] bin/rasel
+    - [ ] bin/rasel-annotated
+      - [x] basic
+      - [ ] the rest
+    - [ ] bin/rasel-convert
+    - [ ] bin/rasel-ide?
+  - [ ] add truffleruby (use https://github.com/graalvm/container/pkgs/container/truffleruby)
+- [ ] IDE improvements
+  - [x] more compact JSON export
+  - [ ] scrollable div for log
+  - [ ] highlight the cell on log mouse hover
+  - [ ] easier clearing the cell
+  - [ ] navigate with keyboard arrows
+  - [ ] add/remove cell in one row
+  - [ ] copy/paste rows
+  - [ ] show accumulated prints
+  - [ ] undo(/redo?)
+  - [ ] \ should annotate right one, not left one?
+  - [ ] colorful annotations?
+  - [ ] annotate empty cell to annotate top?
+  - [ ] configurable print size and time limits?
 
 ## Development notes
 
 When using jruby you should set env var `CI` to bundle and run tests avoiding the `gem ruby-prof` installation failure.
 
-### Debugging and profiling env vars (currently not tested/maintained)
-
-Environment variable `DEBUG` makes it print the current instruction, stack and stringmode like this:
-```none
-["&", false, []]
-[":", false, [10]]
-["?", false, [10, 10]]
-["1", false, [10]]
-["-", false, [10, 1]]
-[":", false, [9]]
-...
-```
-Also `DEBUG_HISTORY` and `PROFILE` to profile RASEL and Ruby code respectively.
+TODO: add a tutorial how to debug with `rasel-annotated`
