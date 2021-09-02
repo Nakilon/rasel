@@ -9,7 +9,8 @@ require_relative "lib/rasel"
 describe "bin" do
 
   describe "rasel" do
-    around{ |test| Timeout.timeout(RUBY_PLATFORM == "java" ? 4 : 1){ test.call } }
+    around{ |test| Timeout.timeout(RUBY_ENGINE == "jruby" ? 4 :
+                                   RUBY_ENGINE == "truffleruby" ? 2 : 1){ test.call } }
     require "open3"
     [
       ["cat.rasel < examples/cat.rasel", 0, File.read("examples/cat.rasel")],
@@ -28,7 +29,7 @@ describe "bin" do
   end
 
   describe "rasel" do
-    around{ |test| Timeout.timeout(1){ test.call } }
+    around{ |test| Timeout.timeout(RUBY_ENGINE == "jruby" ? 3 : 1){ test.call } }
     it "rasel-annotated" do
       # can't implemented this test using Open3 because of a weird Ruby bug: Illegal seek @ rb_io_tell
       stdout = Tempfile.new "rasel-test-stdout"
@@ -200,6 +201,8 @@ describe "lib" do
 end
 
 describe "other" do
+  around{ |test| Timeout.timeout(RUBY_ENGINE == "jruby" ? 2 :
+                                 RUBY_ENGINE == "truffleruby" ? 3 : 1){ test.call } }
   def assert_stack expectation, *args
     result = RASEL *args
     assert_equal expectation, [*result.stack, result.exitcode]
@@ -214,8 +217,8 @@ describe "other" do
 end
 
 describe "brainfuck" do
-  around{ |test| Timeout.timeout(1){ test.call } }
   describe "basic tests" do
+    around{ |test| Timeout.timeout(RUBY_ENGINE == "jruby" ? 4 : 1){ test.call } }
     [
       [",.", ".,,..,. 1234", "\x00223", 0],
       ["[", "[<+]++.<", "\x02tape end\n", 1],
@@ -230,6 +233,8 @@ describe "brainfuck" do
     end
   end
   describe "Hello world!" do
+    around{ |test| Timeout.timeout(RUBY_ENGINE == "jruby" ? 5 :
+                                   RUBY_ENGINE == "truffleruby" ? 3 : 1){ test.call } }
     [
       [1, "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."],
       [2, "++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>."],

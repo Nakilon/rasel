@@ -207,7 +207,7 @@ The "RASEL IDE" is for editing the `.rasela` "annotated" code. It is fully expla
     - [ ] bin/rasel-convert
     - [ ] bin/rasel-ide?
   - [ ] add truffleruby (use https://github.com/graalvm/container/pkgs/container/truffleruby)
-  - [ ] add jruby?
+  - [ ] add jruby (`JAVA_HOME=$(/usr/libexec/java_home) ruby test.rb`)
 - [ ] IDE improvements
   - [x] more compact JSON export
   - [ ] scrollable div for log
