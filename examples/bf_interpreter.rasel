@@ -3,7 +3,7 @@
             $
      >      >06--::3-v
  v         >         >:3-?v::\
-                          >"dne",,,A,0@
+                          >0@
 > 1\1-\ 1->^
 ^>:"["-:/?#v2\::\:?v1\1-\2\
           #        >1\1-\2\02\\v
@@ -36,3 +36,9 @@
  v         <
 ^>:"+"-:/?#v2\::\01--G1G//%1\1-\2\
            >"dmc dab",,,,,,,A,1@
+
+* converted from .rasela, debug prints (:,) removed
+* bf code ends with eof or ' ', the rest is stdin
+* read from eof exits with code 1
+* going to the negative tape address exits with code 1
+* instruction other than [],.<>-+ exists with code 1

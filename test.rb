@@ -215,16 +215,30 @@ end
 
 describe "brainfuck" do
   around{ |test| Timeout.timeout(1){ test.call } }
-  [
-    [",.", ".,,..,. 1234", "\x00223end\n", 0],
-    ["[", "[<+]++.<", "\x02tape end\n", 1],
-    ["[[", "[[<,],],.< 1", "1tape end\n", 1],
-    ["]", "++[>,.<-],. 1234", "123end\n", 0],
-    ["]]", "++[.>[]<-]", "\x02\x01end\n", 0],
-  ].each do |name, input, expected_output, expected_status|
-    it name do
-      string, status = Open3.capture2e "printf \"#{input}\" | ./bin/rasel examples/bf_interpreter.rasel"
-      assert_equal [expected_status, expected_output], [status.exitstatus, string]
+  describe "basic tests" do
+    [
+      [",.", ".,,..,. 1234", "\x00223", 0],
+      ["[", "[<+]++.<", "\x02tape end\n", 1],
+      ["[[", "[[<,],],.< 1", "1tape end\n", 1],
+      ["]", "++[>,.<-],. 1234", "123", 0],
+      ["]]", "++[.>[]<-]", "\x02\x01", 0],
+    ].each do |name, input, expected_output, expected_status|
+      it name do
+        string, status = Open3.capture2e "printf \"#{input}\" | ./bin/rasel examples/bf_interpreter.rasel"
+        assert_equal [expected_status, expected_output], [status.exitstatus, string]
+      end
     end
   end
+  describe "Hello world!" do
+    [
+      [1, "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."],
+      [2, "++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>."],
+    ].each do |name, input, expected_output|
+      it name do
+        string, status = Open3.capture2e "printf \"#{input}\" | ./bin/rasel examples/bf_interpreter.rasel"
+        assert_equal [0, "Hello World!\n"], [status.exitstatus, string]
+      end
+    end
+  end
+  # TODO: tests for all 'exit 1' cases, etc.
 end
