@@ -2,7 +2,7 @@
 
 abort "usage:\trasel-ide <file.rasela>" unless 1 == ARGV.size
 abort "invalid directory" unless File.directory? File.dirname File.expand_path ARGV.first
-require "json"
+require "json/pure"
 require_relative "../lib/rasel"
 RASEL.write_pretty_json ARGV.first, [[0,0,"@"]] unless File.exist? ARGV.first
 abort "the argument should be a file" unless File.file? ARGV.first if File.exist? ARGV.first
@@ -269,7 +269,7 @@ post "/run" do
       RASEL::run_annotated \
         JSON.load(File.read ARGV.first),
         StringIO.new,
-        StringIO.new.tap{ |_| JSON.load(params.fetch "stdin").bytes.reverse_each &_.method(:ungetbyte) }
+        StringIO.new.tap{ |_| JSON.parse(params.fetch("stdin"), quirks_mode: true).bytes.reverse_each &_.method(:ungetbyte) }
     end
     JSON.dump({status: :success, data: [result.stdout.string.split("\n"), result.exitcode]})
   rescue Timeout::Error

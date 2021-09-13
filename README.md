@@ -1,4 +1,4 @@
-# RASEL (Random Access Stack Esoteric Language)
+# RASEL (Random Access Stack Esoteric Language) v2
 
 A programming language inspired by Befunge where instead of the program space random access you have the ability to swap with the Nth value in the stack.
 
@@ -48,7 +48,6 @@ $ echo 5 | rasel examples/fibonacci.rasel
   * `@` -- exit with code popped from the stack  
     If the value isn't integer and isn't within 0..255 the error is raised.
   * `0`..`9`, `A`..`Z` -- push single [Base36](https://en.wikipedia.org/wiki/Base36) digit value onto the stack
-  * `$` -- "discard" -- pop a value and do nothing with it
   * `:` -- "duplicate" -- pop a value and add it back to the stack twice
   * `>`, `<`, `^`, `v` -- set instruction pointer direction
   * `"` -- toggle "stringmode" (by default is off)  
@@ -91,6 +90,7 @@ $ echo 5 | rasel examples/fibonacci.rasel
 * instructions `|` and `_` are replaced with a single instruction `?` that tests if the value is positive
 * instructions that are removed
   * `?` (move to a random direction)
+  * `$` for arbitrary value can be replaced with `:--`, `0/-` or `?  ` (are there any more ways?)
   * `+` and `*` (addition and multiplication)  
     can be easily emulated using `-` and `/` (subtraction and division), removed just for the fun of it
   * `` ` `` and `!` ("if greater" and "logical negation")  
@@ -100,14 +100,14 @@ $ echo 5 | rasel examples/fibonacci.rasel
 
 ## Examples (more [here](examples))
 
-### Factorial ([OEIS A000142](https://oeis.org/A000142))
+### Factorial(n) ([OEIS A000142](https://oeis.org/A000142))
 
 ```
-1&\:?v:1-3\$/
-1\/.@>$1
+1&\:?v:1-3\-/
+1\/.@>-1
 ```
 
-### Fibonacci ([OEIS A000045](https://oeis.org/A000045))
+### Fibonacci(n) ([OEIS A000045](https://oeis.org/A000045))
 
 ```
 1&-:?v1\:3\01\--1\
@@ -121,12 +121,12 @@ $ echo 5 | rasel examples/fibonacci.rasel
  ^  >--.@j5\1--\3:<
 ```
 
-### Prime numbers generator
+### Prime numbers generator ([OEIS A000040](https://oeis.org/A000040)) (trial division by a growing list)
 
 ```
-2:4v     >$       2-\$:.> 01--#
-   >::\:?^:3\1\%?v2-\1\:2\01--
-                 >2-\$  v
+2:4v     >-       2-\:--:.>01--#
+   >::\:?^:3\1\%?v2-\1\:2\ 01--
+                 >2-\:--  v
 ```
 ```none
 $ rasel examples/prime.rasel
@@ -145,7 +145,7 @@ Befunge-93 (by @fis):
 RASEL:
 ```
 &v
- >2v         >$$$$
+ >2v         >///-
    >01--::\:?^:0:5\:6\---K/"e"-:/?v1\1-\
                                   >1:4\//.A,@
 ```
@@ -163,7 +163,7 @@ The "RASEL IDE" is for editing the `.rasela` "annotated" code. It is fully expla
   ```
   The `.rasela` file format is JSON.
 * `bin/rasel-annotated`  
-  Use it to run `.rasela`. Currently it has some hardcoded time and stdout print size limits because you don't want to wait forever when launching via the IDE.
+  Use it to run `.rasela`. Currently it has some time and stdout print size limits because you don't want to wait forever when launching via the IDE. Use env var `IDE_LIMIT_PRINTED` to override the default print size limit of 500000.
 * `bin/rasel-ide`  
   ```none
   $ rasel-ide
@@ -171,6 +171,14 @@ The "RASEL IDE" is for editing the `.rasela` "annotated" code. It is fully expla
   ```
   CSS and JS improvements ideas and help are welcome.
   ![IDE example screenshot](https://user-images.githubusercontent.com/2870363/130821475-76d2d12b-237c-4cfb-a21f-b85107c2c3ca.png)
+
+## Specification version history
+
+* v0  
+* v1 introduced `\` ("swapn")  
+* v2 deprecated `$` ("discard")
+
+Note that the gem version number isn't supposed to match the specification version number.
 
 ## TODO
 
@@ -185,7 +193,7 @@ The "RASEL IDE" is for editing the `.rasela` "annotated" code. It is fully expla
     - [x] old
       - [x] `"`, `#`
       - [x] `0`..`9`
-      - [x] `$`, `:`, `\`
+      - [x] `:`, `\`
       - [x] `>`, `<`, `^`, `v`
       - [x] `-`, `/`, `%`
       - [x] `.`, `,`
@@ -222,6 +230,7 @@ The "RASEL IDE" is for editing the `.rasela` "annotated" code. It is fully expla
   - [ ] colorful annotations?
   - [ ] annotate empty cell to annotate top?
   - [ ] configurable print size and time limits?
+  - [ ] print Rationals
 
 ## Development notes
 

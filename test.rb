@@ -32,6 +32,7 @@ describe "bin" do
     around{ |test| Timeout.timeout(RUBY_ENGINE == "jruby" ? 3 : 1){ test.call } }
     it "rasel-annotated" do
       # can't implemented this test using Open3 because of a weird Ruby bug: Illegal seek @ rb_io_tell
+      # TODO: try using Minitest capture_subprocess_io
       stdout = Tempfile.new "rasel-test-stdout"
       stderr = Tempfile.new "rasel-test-stderr"
       begin
@@ -120,7 +121,6 @@ describe "lib" do
           HEREDOC
       end
       it "0..9, A..Z" do assert_stack [*0..35], "#{[*0..9].join}#{[*?A..?Z].join}@" end
-      it "$"  do assert_stack [1], "$12$@" end
       it ":" do assert_stack [0, 0, 1, 1], ":1:@" end
       it "><^v" do
         assert_stack [1, 2, 3, 4],
@@ -216,7 +216,7 @@ describe "other" do
   end
 end
 
-describe "brainfuck" do
+describe "brainfuck interpreter" do
   describe "basic tests" do
     around{ |test| Timeout.timeout(RUBY_ENGINE == "jruby" ? 4 : 1){ test.call } }
     [

@@ -1,3 +1,5 @@
+# TODO: update the list for specification v2
+
 require_relative "lib/rasel"
 require "set"
 require "pcbr"

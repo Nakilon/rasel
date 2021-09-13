@@ -11,7 +11,7 @@ end
 abort_usage.call unless ARGV[0] and File.file? ARGV[0]
 abort_usage.call unless ARGV[0] and ARGV[1] and (!File.exist?(ARGV[1]) || puts("overwriting")) || File.file?(ARGV[1])
 
-require "json"
+require "json/pure"
 case ARGV.map &File.method(:extname)
 when %w{ .rasel .rasela }
   require_relative "../lib/rasel"

@@ -56,7 +56,6 @@ module RASEL
         when ?A..?Z ; stack.push byte - 55
         when ?" ; stringmode ^= true
         when ?# ; move[]
-        when ?$ ; pop[]
         when ?: ; stack.concat [pop[]] * 2
         when ?- ; stack.push -(pop[] - pop[])
         when ?/ ; b, a = pop[], pop[]; stack.push b.zero? ? 0 : Rational(a) / b
@@ -116,7 +115,7 @@ module RASEL
       define_singleton_method :puts do |str, reason|
         next if prev == dump = JSON.dump([reason, str])
         old_puts.call prev = dump
-        if 500_000 < stdout.pos - pos
+        if ENV.fetch("IDE_LIMIT_PRINTED", "500000").to_i < stdout.pos - pos
           old_puts.call JSON.dump [:abort, "printed size"]
           error.call
         end
@@ -160,7 +159,6 @@ module RASEL
         when ?A..?Z ; stack.push StackItem.new byte - 55, annotation
         when ?" ; stringmode ^= true
         when ?# ; move[]
-        when ?$ ; pop[]
         when ?: ; popped = pop[]; stack.push popped; stack.push StackItem.new popped, annotation
         when ?- ; stack.push StackItem.new -(pop[] - pop[]), annotation
         when ?/ ; b, a = pop[], pop[]; stack.push StackItem.new b.zero? ? 0 : Rational(a) / b, annotation

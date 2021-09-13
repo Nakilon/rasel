@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name         = "rasel"
-  spec.version      = "1.1.5"
+  spec.version      = "1.2.0"
   spec.summary      = "Random Access Stack Esoteric Language"
 
   spec.author       = "Victor Maslov aka Nakilon"

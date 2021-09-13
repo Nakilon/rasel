@@ -1,3 +1,5 @@
+# TODO: update for specification v2
+
 x = y = 0
 code = [[]]
 stack = []
