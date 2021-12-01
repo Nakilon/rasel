@@ -9,7 +9,7 @@ abort "the argument should be a file" unless File.file? ARGV.first if File.exist
 
 require "sinatra"
 enable :run
-# require "sinatra/reloader"  # uncomment only during the development
+require "sinatra/reloader"  # uncomment only during the development
 get "/jquery.js" do
   send_file "#{__dir__}/jquery-3.6.0.min.js"
 end
@@ -50,7 +50,9 @@ get "/" do
               const [stdout, exitstatus] = data;
               $("#result").empty().
                 append(`<div><b>EXIT CODE:</b> ${exitstatus}</div>`).
-                append("<div><b>LOG:</b></div>");
+                append("<div><b>LOG:</b></div>");//.append(stdout)//.
+                //append("<div><b>STDOUT:</b></div>").append(stdout)//.
+                //append("<div><b>STDERR:</b></div>").append(stderr)
               stdout.forEach( function(msg) {
                 const [reason, str] = JSON.parse(msg);
                 const div = $("<div style='display: flex; gap: 0.3rem; align-items: baseline'></div>");
@@ -278,3 +280,27 @@ post "/run" do
   end
 end
 
+__END__
+
+require "open3"
+post "/run" do
+  # JSON.dump RASEL(JSON.load(File.read(ARGV.first)), StringIO.new)
+  stdin = Tempfile.new %w{ rasel-ide .rasela }
+  stdin.write JSON.load params.fetch "stdin"
+  stdin.flush
+  begin
+    Open3.popen3 "cat #{p stdin.path} | #{__dir__}/rasel-annotated #{ARGV.first}" do |_, stdout, stderr, wait_thr|
+      begin
+        process_status = Timeout.timeout(2){ wait_thr.value }
+        JSON.dump({status: :success, data: [stdout.read, stderr.read, process_status.exitstatus]})
+      rescue Timeout::Error
+        # TODO: test this branch
+        Process.kill "KILL", wait_thr.pid
+        JSON.dump({status: :error, message: :timeout, data: [stdout, stderr]})
+      end
+    end
+  ensure
+    stdin.close
+    stdin.unlink
+  end
+end

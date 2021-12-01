@@ -1,6 +1,6 @@
-# RASEL (Random Access Stack Esoteric Language) v2
+# RASEL (Random Access Stack Esoteric Language) v3
 
-A programming language inspired by Befunge where instead of the program space random access you have the ability to swap with the Nth value in the stack.
+A programming language inspired by Befunge where you have a random access not to the program space but to the stack.
 
 This repository includes [specification](#reference-specification), [examples](examples), [executables](bin) and [library](lib/rasel.rb), its [tests](test.rb) running as [GitHub Action](.github/workflows/test.yaml). There is also an IDE -- read more about it in the Esolang Wiki [RASEL](https://esolangs.org/wiki/RASEL) language article.
 
@@ -41,12 +41,10 @@ $ echo 5 | rasel examples/fibonacci.rasel
 ## Reference specification
 
 * Every "error raised" in this specification mean it should halt the program with any (depends on the implementation) [exit status code](https://en.wikipedia.org/wiki/Exit_status) from 1 to 255. The only currently known undefined things are how float numbers are printed (TODO: maybe implement the ability to specify precision?) and how empty source file is treated. If you find anything else missing, please report.
-* Programs are read as ASCII-8BIT lines splitted by 0x0A character. For every source code line trailing space characters are trimmed and then readded to reach the length defined by the highest x coordinate of any (including invalid) non-space character in the whole source file. Lines with no non-space characters at the end of the source file are trimmed. After the source code load the program space is effectively a rectangle of NxM characters that has at least one non-space character in the last column and in the last row. Space characters are [nop](https://en.wikipedia.org/wiki/NOP_(code))s when not in the "stringmode". All other characters that are not defined in the specification raise an error if the instruction pointer reaches them unless the previous instruction was "trampoline" so it's just skipped.
+* Programs are read as ASCII-8BIT lines splitted by 0x0A character. For every source code line trailing space characters are trimmed and then readded to reach the length defined by the highest x coordinate of any (including invalid) non-space character in the whole source file. Lines with no non-space characters at the end of the source file are trimmed. After the source code load the program space is effectively a rectangle of NxM characters that has at least one non-space character in the last column and in the last row. Space characters are [nop](https://en.wikipedia.org/wiki/NOP_(code))s instructions when not in the "stringmode". All other characters that are not defined in the specification raise an error if the instruction pointer reaches them unless the previous instruction was "trampoline" so it's just skipped.
 * Stack data type is [Rational](https://en.wikipedia.org/wiki/Rational_data_type). Numerators and denominators are bignums, i.e. there should be no [rounding errors](https://en.wikipedia.org/wiki/Round-off_error). The "is integer" in this specification means "does not have a [fractional part](https://en.wikipedia.org/wiki/Fractional_part)".
 * "Popping a value" means taking out the top value from the stack and using it in the instruction that initiated the popping. When stack is empty popping from it creates 0. For language user it should be effectively indistinguishable if the stack is empty or just has several 0 left in it.
 * Instructions:
-  * `@` -- exit with code popped from the stack  
-    If the value isn't integer and isn't within 0..255 the error is raised.
   * `0`..`9`, `A`..`Z` -- push single [Base36](https://en.wikipedia.org/wiki/Base36) digit value onto the stack
   * `:` -- "duplicate" -- pop a value and add it back to the stack twice
   * `>`, `<`, `^`, `v` -- set instruction pointer direction
@@ -75,7 +73,25 @@ $ echo 5 | rasel examples/fibonacci.rasel
   * `j` -- "jump forward" -- pop a value from the stack and jump over that many cells in the current instruction pointer direction  
     If the value isn't integer the error is raised.  
     If the value is negative, jump is done the opposite direction but the instruction pointer direction does not change.
-  * `?` -- "if positive" -- pop a value and work as "trampoline" if it's positive
+  * `?` -- "if positive" -- pop a value and work as "trampoline" if it's positive  
+  * `f` -- "fork" -- split execution into two async threads starting from the next two instructions, parent and child respectively  
+    Every thread has a parent (except of the main thread) and any number of child threads.  
+    Thread starts with an empty stack but inherits parent's direction.  
+    Thread uses two queues (input and output) of unlimited size to connect to parent.  
+    Thread is connected to N children via two queues of N queues.  
+    Each 
+    When having multiple child threads the parent operates only the oldest pair of queues.  
+    When the pair of queues
+    Thread is connected to all its child threads via single queue.
+  * `t`, `d` -- "throw" and "drop" -- to parent, child queue  
+  * `c`, `p` -- "catch" and "pick" -- from parent, child queue and work as "trampoline"  
+    Popping blocks the thread until queue has a value or is empty and closed by another thread.  
+    In case of the multiple child threads pops from the oldest one until unable.
+    If the last queue is empty and closed instruction adds nothing to the stack and does not work as "trampoline".  
+  * `@` -- exit the thread  
+    In child thread it just kills it while other threads continue the execution.  
+    In main thread it terminates the whole program and pops the exit code from the main thread stack.  
+    If the value isn't integer and isn't within 0..255 the error is raised.  
 
 ## Not all but the main differences from Befunge-93/98
 

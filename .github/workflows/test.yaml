@@ -9,13 +9,13 @@ jobs:
     - uses: actions/checkout@v2
     - run: docker run -e CI -v $(pwd):/checkout ruby:2.3-alpine sh -c "cd checkout && rm -f Gemfile.lock && bundle install && ruby test.rb"
       timeout-minutes: 1
-    - run: docker run -e CI -v $(pwd):/checkout ruby:alpine3.7 sh -c "cd checkout && rm -f Gemfile.lock && bundle install && ruby test.rb"
+    - run: docker run -e CI -v $(pwd):/checkout ruby:alpine3.7  sh -c "cd checkout && rm -f Gemfile.lock && bundle install && ruby test.rb"
       timeout-minutes: 1
     - run: docker run -e CI -v $(pwd):/checkout ruby:alpine     sh -c "cd checkout && rm -f Gemfile.lock && bundle install && ruby test.rb"
       timeout-minutes: 1
-    - run: docker run -e CI -v $(pwd):/checkout alpine:3.7 sh -c "cd checkout &&               apk add ruby          && gem install -N bundler && rm -f Gemfile.lock && bundle install && ruby test.rb"
+    - run: docker run -e CI -v $(pwd):/checkout alpine:3.7 sh -c "cd checkout && apk add ruby          && gem install -N bundler && rm -f Gemfile.lock && bundle install && ruby test.rb"
       timeout-minutes: 1
-    - run: docker run -e CI -v $(pwd):/checkout alpine      sh -c "cd checkout &&              apk add ruby ruby-etc && gem install -N bundler && rm -f Gemfile.lock && bundle install && ruby test.rb"
+    - run: docker run -e CI -v $(pwd):/checkout alpine     sh -c "cd checkout && apk add ruby ruby-etc && gem install -N bundler && rm -f Gemfile.lock && bundle install && ruby test.rb"
       timeout-minutes: 1
 
 # packages    ruby docker hub
