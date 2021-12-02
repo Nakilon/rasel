@@ -121,6 +121,8 @@ $ echo 5 | rasel examples/fibonacci.rasel
  ^  >--.@j5\1--\3:<
 ```
 
+Note that in the examples folder the PE solutions might assume the `\n`-terminated input, not the chomped one like AoC website gives it to you.
+
 ### Prime numbers generator ([OEIS A000040](https://oeis.org/A000040)) (trial division by a growing list)
 
 ```
